@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 
 namespace _URLTester.Test
 {
+    /// <summary>
+    /// Executes the URL test using a Parallel foreach to take advantage of multithreading
+    /// Inherits all other functions from RedirectTest
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ParallelRedirectTest<T> : RedirectTest<T>
     {
-        public ParallelRedirectTest(string baseURL, string csvString, string outputText) : base(baseURL, csvString, outputText)
+        public ParallelRedirectTest(string baseURL, string csvString, string outPutFlePath) : base(baseURL, csvString, outPutFlePath)
         {
         }
 
@@ -20,7 +25,7 @@ namespace _URLTester.Test
             
             Parallel.ForEach(urlList, (item) =>
             {
-                var retval = TestLink(ref item);
+                var retval = TestLink(item);
                 if(returnValue == true && retval == false)
                 {
                     returnValue = retval;
@@ -28,27 +33,6 @@ namespace _URLTester.Test
             });
 
             return returnValue;
-        }
-
-        private bool TestLink(ref UrlData item)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseURL + item.url);
-            string responseBody = String.Empty;
-            try
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    item.headerResponseCode = response.StatusCode;
-                    item.actualRedirect = response.ResponseUri;
-                }
-                return true;
-            }
-            catch (WebException webEx)
-            {
-                errorMessages.Add(new ErrorMessage(String.Format("An error occurred with this url - {0} | {1}", item.url, webEx.Message)));
-                item.errorMessage = string.Format("{0} -- {1}", webEx.Message, webEx.InnerException);
-                return false;
-            }
         }
     }
 }

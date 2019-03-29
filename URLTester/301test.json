@@ -1,0 +1,18 @@
+[
+	{
+      "URL": "/sell",
+      "expectedRedirect": "https://rv.ganderoutdoors.com/sell"
+    },
+	{
+	  "URL": "/america-choice", 
+	  "expectedRedirect": "https://rv.ganderoutdoors.com/america-choice",
+	},
+	{
+	  "URL": "/service", 
+	  "expectedRedirect": "https://rv.ganderoutdoors.com/service",
+	},	
+    {
+      "URL": "/rvclass/travel-trailer-/rvclass",
+      "expectedRedirect": "/rvclass/travel-trailer-/rvclass"
+    }
+]

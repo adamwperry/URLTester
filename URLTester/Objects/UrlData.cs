@@ -3,11 +3,9 @@ using System.Net;
 
 namespace _URLTester.Objects
 {
-    public interface IUrlData
-    {
-
-    }
-
+    /// <summary>
+    /// abstract url object that ise used to contain the data for a test.
+    /// </summary>
     public abstract class BaseUrlData
     {
         public string url { get; set; }
@@ -15,6 +13,8 @@ namespace _URLTester.Objects
 
         public Uri actualRedirect { get; set; }
         public HttpStatusCode headerResponseCode { get; set; }
+
+        public bool testfail { get; set; } = false;
 
         public string errorMessage { get; set; }
 

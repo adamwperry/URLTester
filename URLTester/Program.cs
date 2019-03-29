@@ -10,7 +10,8 @@ namespace _URLTester
 
         static void Main(string[] args)
         {
-            Console.WriteLine("URLTester");
+            Console.WriteLine("URLTester version 1.1");
+            Console.Write(Environment.NewLine);
 
             if (args.Length == 0)
             {
@@ -26,7 +27,7 @@ namespace _URLTester
                 return;
             }
             
-            if (string.IsNullOrEmpty(appArgs.domain) || string.IsNullOrEmpty(appArgs.csvFilePath))
+            if (string.IsNullOrEmpty(appArgs.domain) || string.IsNullOrEmpty(appArgs.filePath))
             {
                 PrintMissingArguments();
                 PrintHelp();
@@ -36,39 +37,51 @@ namespace _URLTester
             IURLTest<UrlData> test = null;
             if (appArgs.mutlithreaded)
             {
-                test = new ParallelRedirectTest<UrlData>(appArgs.domain, appArgs.csvFilePath, appArgs.outputText);
+                test = new ParallelRedirectTest<UrlData>(appArgs.domain, appArgs.filePath, appArgs.outputText);
             }
             else
             {
-                test = new RedirectTest<UrlData>(appArgs.domain, appArgs.csvFilePath, appArgs.outputText);
+                test = new RedirectTest<UrlData>(appArgs.domain, appArgs.filePath, appArgs.outputText);
             }
 
 
             var testManager = new RedirectTestManager<UrlData>(test);
 
             Console.WriteLine("Loading File.....");
+            Console.Write(Environment.NewLine);
 
-            if (!testManager.LoadCSV())
+            if (!testManager.LoadFile())
             {
                 //if errors then display them
                 testManager.OutPutErrorMessages();
                 Console.ReadLine();
                 return;
             }
+
+            Console.WriteLine("Running.....");
+            Console.Write(Environment.NewLine);
 
             if (!testManager.TestLinks())
             {
+                //turning off now -- displaying on screen and saving in csv
+                //Console.WriteLine("Errors.....");
                 //if errors then display them
-                testManager.OutPutErrorMessages();
-                Console.ReadLine();
-                return;
+                //testManager.OutPutErrorMessages();
             }
+
+            Console.WriteLine("Results.....");
+            Console.Write(Environment.NewLine);
             
-            Console.WriteLine("Running.....");
+
             testManager.OutPutResults();
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Parses the application args passed into the applicaiton
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>Arguments Object</returns>
         private static Arguments ParseArguments(string[] args)
         {
             try
@@ -81,7 +94,7 @@ namespace _URLTester
                     {
                         case "-f":
                             i++;
-                            appArgs.csvFilePath = args[i];
+                            appArgs.filePath = args[i];
                             break;
                         case "-d":
                             i++;
@@ -109,23 +122,29 @@ namespace _URLTester
             }
         }
 
+        /// <summary>
+        /// Prints the help man
+        /// </summary>
         private static void PrintHelp()
         {
-            //-d http://www.example.com -f C:\Users\adamw\source\repos\301Tester\301Tester\301test.csv
             Console.WriteLine("Usage: URLTester [-f] [-d] [-o] [-h]");
             Console.WriteLine("");
             Console.WriteLine("Options:");
-            Console.WriteLine("\t -f \t \t CSV File Path that contains the url list to be tested.");
+            Console.WriteLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
             Console.WriteLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-            Console.WriteLine("\t -o \t \t Optional output text file eg. https://www.example.com");
-            Console.WriteLine("\t -t \t \t Runs test as a mutlithread operation. https://www.example.com");
+            Console.WriteLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
+            Console.WriteLine("\t -t \t \t Runs test as a mutlithread operation.");
             Console.WriteLine("\t -h Help \t Help Manual");
             Console.WriteLine("");
             Console.WriteLine("Sample Arguements");
-            Console.WriteLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.txt");
+            Console.WriteLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
             Console.ReadLine();
         }
 
+
+        /// <summary>
+        /// Simple message informing use that some of the arguments are missing.
+        /// </summary>
         private static void PrintMissingArguments()
         {
             Console.WriteLine("Missing Arguments -- Please try again.");

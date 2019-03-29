@@ -27,12 +27,12 @@ namespace Parsers
                 {
                     var line = readFile.ReadLine(); //read each line
                     //and split each line to get the values of the respective headers
-                    var delimiter = new char[','];
-                    var values = line.Split(',');
+                    var delimiter = new char['|'];
+                    var values = line.Split('|');
                     int i = 0;
                     foreach (String val in values)
                     {
-                        //Get th    e header
+                        //Get the header
                         var currHeader = getHeaders[i].ToString();
                         //find the object property -- note I am removing spaces and ToUpper and Trimming the file column headers
                         var ojbProperty =

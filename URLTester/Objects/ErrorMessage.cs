@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.Objects
 {
+    /// <summary>
+    /// CRL error object for storage
+    /// </summary>
     public class ErrorMessage
     {
         public string message { get; set; }
