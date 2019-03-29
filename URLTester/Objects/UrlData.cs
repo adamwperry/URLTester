@@ -4,7 +4,7 @@ using System.Net;
 namespace _URLTester.Objects
 {
     /// <summary>
-    /// abstract url object that ise used to contain the data for a test.
+    /// abstract url object that is used to contain the data for a test.
     /// </summary>
     public abstract class BaseUrlData
     {
