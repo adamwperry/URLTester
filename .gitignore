@@ -6,3 +6,5 @@ URLTester/301test.csv
 .vs/URLTester/v15/Server/sqlite3/storage.ide
 .vs/URLTester/v15/Server/sqlite3/storage.ide-shm
 .vs/URLTester/v15/Server/sqlite3/storage.ide-wal
+*.dll
+packages/*
