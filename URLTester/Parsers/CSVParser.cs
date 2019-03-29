@@ -27,8 +27,8 @@ namespace Parsers
                 {
                     var line = readFile.ReadLine(); //read each line
                     //and split each line to get the values of the respective headers
-                    var delimiter = new char['|'];
-                    var values = line.Split('|');
+                    var delimiter = new char[','];
+                    var values = line.Split(',');
                     int i = 0;
                     foreach (String val in values)
                     {
