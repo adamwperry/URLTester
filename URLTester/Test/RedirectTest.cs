@@ -38,6 +38,7 @@ namespace UrlTester.Test
         public bool LoadFile()
         {
             ErrorMessages = new List<ErrorMessage>();
+            IParser<T> parser = null;
 
             //Lets check for file path existence before we try to grab extension
             if (!File.Exists(FilePath))
@@ -46,7 +47,7 @@ namespace UrlTester.Test
                 return false;
             }
 
-            var parser = fileExtensions[Path.GetExtension(FilePath).ToUpper()];
+            fileExtensions.TryGetValue(Path.GetExtension(FilePath).ToUpper(), out parser);
 
             if (parser == null)
             {

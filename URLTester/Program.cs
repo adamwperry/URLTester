@@ -10,8 +10,8 @@ namespace UrlTester
         {
             Console.WriteLine("URLTester version 1.1");
             Console.Write(Environment.NewLine);
-            
-            var appArgs = ParseArguments(args);
+
+            var appArgs = Parsers.ArgumentParser.Parse(args);
             
             if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath))
             {
@@ -53,48 +53,7 @@ namespace UrlTester
             testManager.OutputResults();
             Console.ReadLine();
         }
-
-
-        /// <summary>
-        /// Parses the application args passed into the applicaiton
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns>Arguments Object</returns>
-        private static Arguments ParseArguments(string[] args)
-        {
-            var appArgs = new Arguments();
-            var showHelp = false;
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i])
-                {
-                    case "-f":
-                        appArgs.FilePath = args[i + 1];
-                        break;
-                    case "-d":
-                        appArgs.Domain = args[i + 1];
-                        break;
-                    case "-o":
-                        appArgs.OutputText = args[i + 1];
-                        break;
-                    case "-t":
-                        appArgs.Mutlithreaded = true;
-                        break;
-                    case "-h":
-                    default:
-                        showHelp = true;
-                        break;
-                }
-                i++;
-            }
-
-            if (args.Length == 0 || showHelp)
-                appArgs.Help = true; 
-
-            return appArgs;
-        }
-
+        
         /// <summary>
         /// Prints the help man
         /// </summary>

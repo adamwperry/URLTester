@@ -61,11 +61,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Arguments.cs" />
+    <Compile Include="Parsers\ArgumentParser.cs" />
     <Compile Include="Parsers\JSONParser.cs" />
     <Compile Include="Test\ParallelRedirectTest.cs" />
     <Compile Include="Test\RedirectTestManager.cs" />
     <Compile Include="Test\RedirectTest.cs" />
-    <Compile Include="Test\IURLTest.cs" />
+    <Compile Include="Test\IUrlTest.cs" />
     <Compile Include="Objects\ErrorMessage.cs" />
     <Compile Include="Objects\UrlData.cs" />
     <Compile Include="Parsers\CSVParser.cs" />
