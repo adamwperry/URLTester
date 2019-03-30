@@ -1,4 +1,4 @@
-﻿using _URLTester.Objects;
+﻿using URLTester.Objects;
 using Core.Objects;
 using Parsers;
 using System;
@@ -6,17 +6,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace _URLTester.Test
+namespace URLTester.Test
 {
     public class RedirectTest<T> : IURLTest<T>
     {
-        protected List<UrlData> urlList;
-        protected List<ErrorMessage> errorMessages;
-        protected string baseURL;
-        protected string filePath;
-        protected string outpuFilePatht;
+        protected List<UrlData> UrlList;
+        protected List<ErrorMessage> ErrorMessages;
+        protected readonly string BaseURL;
+        protected readonly string FilePath;
+        protected readonly string OutpuFilePath;
 
-        //ues this dictionary to determine the correct parser to the load the file.               
+        //use this dictionary to determine the correct parser to the load the file.               
         private readonly Dictionary<string, IParser<T>> fileExtensions = new Dictionary<string, IParser<T>>
         {
             {".CSV", new CSVParser<T>() },
@@ -26,9 +26,9 @@ namespace _URLTester.Test
         
         public RedirectTest(string baseURL, string filePath, string outPutFlePath)
         {
-            this.baseURL = baseURL;
-            this.filePath = filePath;
-            this.outpuFilePatht = outPutFlePath;
+            BaseURL = baseURL;
+            FilePath = filePath;
+            OutpuFilePath = outPutFlePath;
         }
 
         /// <summary>
@@ -38,23 +38,23 @@ namespace _URLTester.Test
         /// <returns></returns>
         public bool LoadFile()
         {
-            errorMessages = new List<ErrorMessage>();
+            ErrorMessages = new List<ErrorMessage>();
 
             //create the correct parser based on the file extension
             IParser<T> parser = null;
-            fileExtensions.TryGetValue(Path.GetExtension(filePath).ToUpper(), out parser);
+            fileExtensions.TryGetValue(Path.GetExtension(FilePath).ToUpper(), out parser);
 
             if(parser == null)
             {
                 //todo... create a lib for the messages.
-                errorMessages.Add(new ErrorMessage("File Extension is not supported.", true));
+                ErrorMessages.Add(new ErrorMessage("File Extension is not supported.", true));
             } else
             {
                 var fileParser = new FileParser<T>(parser);
-                urlList = fileParser.ParseFile<UrlData>(filePath, ref errorMessages);
+                UrlList = fileParser.ParseFile<UrlData>(FilePath, ref ErrorMessages);
             }
 
-            if (errorMessages.Count >= 1)
+            if (ErrorMessages.Count >= 1)
             {
                 return false;
             }
@@ -68,10 +68,10 @@ namespace _URLTester.Test
         /// <returns>True if no errors occurred / False if an error has occurred during testing.</returns>
         public virtual bool TestLinks()
         {
-            errorMessages = new List<ErrorMessage>();
+            ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
             
-            foreach (var item in urlList)
+            foreach (var item in UrlList)
             {
                 var retval = TestLink(item);
                 if (returnValue == true && retval == false)
@@ -91,27 +91,27 @@ namespace _URLTester.Test
         /// <returns>True for a successful test / False if the test attempt failed.</returns>
         protected bool TestLink(UrlData item)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseURL + item.url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseURL + item.Url);
             string responseBody = String.Empty;
             try
             {
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
-                    item.headerResponseCode = response.StatusCode;
-                    item.actualRedirect = response.ResponseUri;
+                    item.HeaderResponseCode = response.StatusCode;
+                    item.ActualRedirect = response.ResponseUri;
                 }
 
-                if (item.expectedRedirect != item.actualRedirect.ToString())
+                if (item.ExpectedRedirect != item.ActualRedirect.ToString())
                 {
-                    item.testfail = true;
+                    item.Testfail = true;
                 }
                 return true;
             }
             catch (WebException webEx)
             {
-                errorMessages.Add(new ErrorMessage(String.Format("An error occurred with this url - {0} | {1}", item.url, webEx.Message)));
-                item.errorMessage = string.Format("{0} -- {1}", webEx.Message, webEx.InnerException);
-                item.testfail = true;
+                ErrorMessages.Add(new ErrorMessage(String.Format("An error occurred with this url - {0} | {1}", item.Url, webEx.Message)));
+                item.ErrorMessage = string.Format("{0} -- {1}", webEx.Message, webEx.InnerException);
+                item.Testfail = true;
                 return false;
             }
         }
@@ -126,14 +126,14 @@ namespace _URLTester.Test
             
             //build output dictionary 
             var count = 1;
-            foreach (var item in urlList)
+            foreach (var item in UrlList)
             {
                 outPutList.Add(count, BuildOutPutMessage(item, count));
                 count++;
             }
 
             //creating the output file
-            if (!string.IsNullOrEmpty(outpuFilePatht))
+            if (!string.IsNullOrEmpty(OutpuFilePath))
             {
                 WriteOutputFile(outPutList);
             }
@@ -155,7 +155,7 @@ namespace _URLTester.Test
         {
             try
             {
-                var newPath = MakeUnique(outpuFilePatht);
+                var newPath = MakeUnique(OutpuFilePath);
 
                 using (StreamWriter sw = File.CreateText(newPath.FullName))
                 {
@@ -167,7 +167,7 @@ namespace _URLTester.Test
             }
             catch (Exception ex)
             {
-                errorMessages.Add(new ErrorMessage(ex.Message, true));
+                ErrorMessages.Add(new ErrorMessage(ex.Message, true));
             }
         }
         
@@ -181,9 +181,9 @@ namespace _URLTester.Test
         private string BuildOutPutMessage(BaseUrlData item, int count)
         {
             var output = string.Empty;
-            var errorMessage = !string.IsNullOrEmpty(item.errorMessage) ? item.errorMessage : "\"\"";
+            var errorMessage = !string.IsNullOrEmpty(item.ErrorMessage) ? item.ErrorMessage : "\"\"";
 
-            output = string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", count, !item.testfail ? "Passed" : "Failed", ((int)item.headerResponseCode).ToString(), item.headerResponseCode.ToString(), item.url, item.expectedRedirect, item.actualRedirect, errorMessage);
+            output = string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", count, !item.Testfail ? "Passed" : "Failed", ((int)item.HeaderResponseCode).ToString(), item.HeaderResponseCode.ToString(), item.Url, item.ExpectedRedirect, item.ActualRedirect, errorMessage);
             return output;
         }
 
@@ -213,9 +213,9 @@ namespace _URLTester.Test
         /// </summary>
         public void OutPutErrorMessages()
         {
-            foreach(var error in errorMessages)
+            foreach(var error in ErrorMessages)
             {
-                Console.WriteLine(error.message);
+                Console.WriteLine(error.Message);
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿
-namespace _URLTester.Test
+namespace URLTester.Test
 {
     /// <summary>
     /// Interface that all URL test must be built fromm

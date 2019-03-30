@@ -1,19 +1,19 @@
-﻿namespace _URLTester.Objects
+﻿namespace URLTester.Objects
 {
     /// <summary>
     /// A list of application arguments that can be provided at runtime.
     /// </summary>
     public class Arguments
     {
-        public string filePath { get; set; }
-        public string domain { get; set; }
-        public string outputText { get; set; }
-        public bool mutlithreaded { get; set; }
-        public bool help { get; set; }
+        public string FilePath { get; set; }
+        public string Domain { get; set; }
+        public string OutputText { get; set; }
+        public bool Mutlithreaded { get; set; }
+        public bool Help { get; set; }
 
         public Arguments()
         {
-            help = false;
+            Help = false;
         }
     }
 }

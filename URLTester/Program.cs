@@ -1,8 +1,8 @@
-﻿using _URLTester.Objects;
-using _URLTester.Test;
+﻿using URLTester.Objects;
+using URLTester.Test;
 using System;
 
-namespace _URLTester
+namespace URLTester
 {
     class Program
     {
@@ -21,13 +21,13 @@ namespace _URLTester
             
             var appArgs = ParseArguments(args);
 
-            if (appArgs.help)
+            if (appArgs.Help)
             {
                 PrintHelp();
                 return;
             }
             
-            if (string.IsNullOrEmpty(appArgs.domain) || string.IsNullOrEmpty(appArgs.filePath))
+            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath))
             {
                 PrintMissingArguments();
                 PrintHelp();
@@ -35,13 +35,13 @@ namespace _URLTester
             }
 
             IURLTest<UrlData> test = null;
-            if (appArgs.mutlithreaded)
+            if (appArgs.Mutlithreaded)
             {
-                test = new ParallelRedirectTest<UrlData>(appArgs.domain, appArgs.filePath, appArgs.outputText);
+                test = new ParallelRedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText);
             }
             else
             {
-                test = new RedirectTest<UrlData>(appArgs.domain, appArgs.filePath, appArgs.outputText);
+                test = new RedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText);
             }
 
 
@@ -94,22 +94,22 @@ namespace _URLTester
                     {
                         case "-f":
                             i++;
-                            appArgs.filePath = args[i];
+                            appArgs.FilePath = args[i];
                             break;
                         case "-d":
                             i++;
-                            appArgs.domain = args[i];
+                            appArgs.Domain = args[i];
                             break;
                         case "-o":
                             i++;
-                            appArgs.outputText = args[i];
+                            appArgs.OutputText = args[i];
                             break;
                         case "-t":
                             i++;
-                            appArgs.mutlithreaded = true;
+                            appArgs.Mutlithreaded = true;
                             break;
                         case "-h":
-                            appArgs.help = true;
+                            appArgs.Help = true;
                             break;
                     }
                 }

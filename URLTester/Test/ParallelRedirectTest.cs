@@ -1,11 +1,11 @@
-﻿using _URLTester.Objects;
+﻿using URLTester.Objects;
 using Core.Objects;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace _URLTester.Test
+namespace URLTester.Test
 {
     /// <summary>
     /// Executes the URL test using a Parallel foreach to take advantage of multithreading
@@ -20,10 +20,10 @@ namespace _URLTester.Test
 
         public override bool TestLinks()
         {
-            errorMessages = new List<ErrorMessage>();
+            ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
             
-            Parallel.ForEach(urlList, (item) =>
+            Parallel.ForEach(UrlList, (item) =>
             {
                 var retval = TestLink(item);
                 if(returnValue == true && retval == false)

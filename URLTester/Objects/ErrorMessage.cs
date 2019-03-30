@@ -11,13 +11,13 @@ namespace Core.Objects
     /// </summary>
     public class ErrorMessage
     {
-        public string message { get; set; }
-        public bool criticalError { get; set; }
+        public string Message { get; set; }
+        public bool CriticalError { get; set; }
 
-        public ErrorMessage(string _message, bool _criticalError = false)
+        public ErrorMessage(string message, bool criticalError = false)
         {
-            message = _message;
-            criticalError = _criticalError;
+            Message = message;
+            CriticalError = criticalError;
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
 
 
-namespace _URLTester.Test
+namespace URLTester.Test
 {
     public class RedirectTestManager<T>
     {
-        private readonly IURLTest<T> redirectTest;
+        private readonly IURLTest<T> RedirectTest;
 
         /// <summary>
         /// Setup using a class of IURLTest
@@ -13,7 +13,7 @@ namespace _URLTester.Test
         /// <param name="redirectTest">IURLTest<T></param>
         public RedirectTestManager(IURLTest<T> redirectTest)
         {
-            this.redirectTest = redirectTest ?? throw new ArgumentNullException("parser");
+            RedirectTest = redirectTest ?? throw new ArgumentNullException("parser");
         }
         
         /// <summary>
@@ -22,7 +22,7 @@ namespace _URLTester.Test
         /// <returns></returns>
         public bool LoadFile()
         {
-            return redirectTest.LoadFile();
+            return RedirectTest.LoadFile();
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace _URLTester.Test
         /// <returns></returns>
         public bool TestLinks()
         {
-            return redirectTest.TestLinks();
+            return RedirectTest.TestLinks();
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace _URLTester.Test
         /// <returns></returns>
         public bool OutPutResults()
         {
-            return redirectTest.OutPutResults();
+            return RedirectTest.OutPutResults();
         }
 
 
@@ -49,7 +49,7 @@ namespace _URLTester.Test
         /// </summary>
         public void OutPutErrorMessages()
         {
-           redirectTest.OutPutErrorMessages();
+           RedirectTest.OutPutErrorMessages();
         }
     }
 

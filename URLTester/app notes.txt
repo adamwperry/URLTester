@@ -1,0 +1,26 @@
+fix _urltester namespace
+fix object props names to be like c#
+
+
+parseArgs
+remove try catch from parse args
+
+move i++ 
+
+if (args.Length == 0)
+{
+	PrintHelp();
+	return;
+}
+
+var appArgs = ParseArguments(args);
+
+if (appArgs.help)
+{
+	PrintHelp();
+	return;
+}
+move that to parseArgs
+use exit to stop app
+
+move parseArgs to new lib / project
