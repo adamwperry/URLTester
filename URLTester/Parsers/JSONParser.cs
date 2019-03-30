@@ -9,7 +9,7 @@ namespace Parsers
 {
     public class JSONParser<T> : IParser<T>
     {
-        public List<T> ParseFile<T>(string filePath, ref List<ErrorMessage> errorMessages) where T : new()
+        public List<T> ParseFile<T>(string filePath, List<ErrorMessage> errorMessages) where T : new()
         {
             try
             {
@@ -17,7 +17,7 @@ namespace Parsers
                 {
                     throw new FileNotFoundException("File does not exist.");
                 }
-
+                
                 return JsonConvert.DeserializeObject<List<T>>(File.ReadAllText(filePath));
             }
             catch (FileNotFoundException ex)

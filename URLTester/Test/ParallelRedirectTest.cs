@@ -1,18 +1,18 @@
-﻿using URLTester.Objects;
+﻿using UrlTester.Objects;
 using Core.Objects;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace URLTester.Test
+namespace UrlTester.Test
 {
     /// <summary>
     /// Executes the URL test using a Parallel foreach to take advantage of multithreading
     /// Inherits all other functions from RedirectTest
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ParallelRedirectTest<T> : RedirectTest<T>
+    public class ParallelRedirectTest<T>: RedirectTest<T> where T : IUrlData
     {
         public ParallelRedirectTest(string baseURL, string csvString, string outPutFlePath) : base(baseURL, csvString, outPutFlePath)
         {

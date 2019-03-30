@@ -1,19 +1,19 @@
 ﻿using System;
+using UrlTester.Objects;
 
-
-namespace URLTester.Test
+namespace UrlTester.Test
 {
-    public class RedirectTestManager<T>
+    public class RedirectTestManager<T> where T: IUrlData
     {
-        private readonly IURLTest<T> RedirectTest;
+        private readonly IUrlTest<T> _redirectTest;
 
         /// <summary>
         /// Setup using a class of IURLTest
         /// </summary>
         /// <param name="redirectTest">IURLTest<T></param>
-        public RedirectTestManager(IURLTest<T> redirectTest)
+        public RedirectTestManager(IUrlTest<T> redirectTest)
         {
-            RedirectTest = redirectTest ?? throw new ArgumentNullException("parser");
+            _redirectTest = redirectTest ?? throw new ArgumentNullException("parser");
         }
         
         /// <summary>
@@ -22,35 +22,36 @@ namespace URLTester.Test
         /// <returns></returns>
         public bool LoadFile()
         {
-            return RedirectTest.LoadFile();
+            return _redirectTest.LoadFile();
         }
 
         /// <summary>
-        /// Test the urls a test file using IURLTest Class provided
+        /// Test the urls in a test file using IURLTest Class provided
         /// </summary>
         /// <returns></returns>
         public bool TestLinks()
         {
-            return RedirectTest.TestLinks();
+            return _redirectTest.TestLinks();
         }
 
         /// <summary>
         /// Output a test results using IURLTest Class provided
         /// </summary>
         /// <returns></returns>
-        public bool OutPutResults()
+        public bool OutputResults()
         {
-            return RedirectTest.OutPutResults();
+            return _redirectTest.OutputResults();
         }
-
 
         /// <summary>
         /// Output a test error message for the operation using IURLTest Class provided
         /// </summary>
-        public void OutPutErrorMessages()
+        public void OutputErrorMessages(OutputHandler handler)
         {
-           RedirectTest.OutPutErrorMessages();
+           _redirectTest.OutputErrorMessages(handler);
         }
     }
+
+    public delegate void OutputHandler(string[] messages);
 
 }

@@ -8,7 +8,7 @@ namespace Parsers
 {
     public class CSVParser<T> : IParser<T>
     {
-        public List<T> ParseFile<T>(string filePath, ref List<ErrorMessage> errorMessages) where T : new ()
+        public List<T> ParseFile<T>(string filePath, List<ErrorMessage> errorMessages) where T : new ()
         {
             try
             {

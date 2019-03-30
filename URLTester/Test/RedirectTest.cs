@@ -1,4 +1,4 @@
-﻿using URLTester.Objects;
+﻿using UrlTester.Objects;
 using Core.Objects;
 using Parsers;
 using System;
@@ -6,55 +6,60 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace URLTester.Test
+namespace UrlTester.Test
 {
-    public class RedirectTest<T> : IURLTest<T>
+    public class RedirectTest<T> : IUrlTest<T> where T: IUrlData 
     {
         protected List<UrlData> UrlList;
         protected List<ErrorMessage> ErrorMessages;
-        protected readonly string BaseURL;
+        protected readonly string BaseUrl;
         protected readonly string FilePath;
-        protected readonly string OutpuFilePath;
+        protected readonly string OutputFilePath;
 
         //use this dictionary to determine the correct parser to the load the file.               
         private readonly Dictionary<string, IParser<T>> fileExtensions = new Dictionary<string, IParser<T>>
         {
-            {".CSV", new CSVParser<T>() },
-            {".JSON", new JSONParser<T>() }
-
+            {".CSV", new CSVParser<T>()},
+            {".JSON", new JSONParser<T>()}
         };
         
-        public RedirectTest(string baseURL, string filePath, string outPutFlePath)
+        public RedirectTest(string baseUrl, string filePath, string outputFilePath)
         {
-            BaseURL = baseURL;
+            BaseUrl = baseUrl;
             FilePath = filePath;
-            OutpuFilePath = outPutFlePath;
+            OutputFilePath = outputFilePath;
         }
 
         /// <summary>
-        /// Loads the proviide file (filepPath)
-        /// Uses the Json or CSV parser depending on the file extenions
+        /// Loads the provided file (filePath)
+        /// Uses the Json or CSV parser depending on the file extensions
         /// </summary>
         /// <returns></returns>
         public bool LoadFile()
         {
             ErrorMessages = new List<ErrorMessage>();
 
-            //create the correct parser based on the file extension
-            IParser<T> parser = null;
-            fileExtensions.TryGetValue(Path.GetExtension(FilePath).ToUpper(), out parser);
+            //Lets check for file path existence before we try to grab extension
+            if (!File.Exists(FilePath))
+            {
+                ErrorMessages.Add(new ErrorMessage($"Specified file path, {FilePath}, does not exist.", true));
+                return false;
+            }
 
-            if(parser == null)
+            var parser = fileExtensions[Path.GetExtension(FilePath).ToUpper()];
+
+            if (parser == null)
             {
                 //todo... create a lib for the messages.
                 ErrorMessages.Add(new ErrorMessage("File Extension is not supported.", true));
-            } else
+            }
+            else
             {
                 var fileParser = new FileParser<T>(parser);
-                UrlList = fileParser.ParseFile<UrlData>(FilePath, ref ErrorMessages);
+                UrlList = fileParser.ParseFile<UrlData>(FilePath, ErrorMessages);
             }
 
-            if (ErrorMessages.Count >= 1)
+            if (ErrorMessages.Count > 0)
             {
                 return false;
             }
@@ -91,7 +96,7 @@ namespace URLTester.Test
         /// <returns>True for a successful test / False if the test attempt failed.</returns>
         protected bool TestLink(UrlData item)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseURL + item.Url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseUrl + item.Url);
             string responseBody = String.Empty;
             try
             {
@@ -116,7 +121,7 @@ namespace URLTester.Test
             }
         }
 
-        public bool OutPutResults()
+        public bool OutputResults()
         {
             //using a dictionary to store the output
             var outPutList = new Dictionary<int, string>()
@@ -133,7 +138,7 @@ namespace URLTester.Test
             }
 
             //creating the output file
-            if (!string.IsNullOrEmpty(OutpuFilePath))
+            if (!string.IsNullOrEmpty(OutputFilePath))
             {
                 WriteOutputFile(outPutList);
             }
@@ -155,7 +160,7 @@ namespace URLTester.Test
         {
             try
             {
-                var newPath = MakeUnique(OutpuFilePath);
+                var newPath = MakeUnique(OutputFilePath);
 
                 using (StreamWriter sw = File.CreateText(newPath.FullName))
                 {
@@ -178,7 +183,7 @@ namespace URLTester.Test
         /// <param name="item"></param>
         /// <param name="count"></param>
         /// <returns>string</returns>
-        private string BuildOutPutMessage(BaseUrlData item, int count)
+        private string BuildOutPutMessage(IUrlData item, int count)
         {
             var output = string.Empty;
             var errorMessage = !string.IsNullOrEmpty(item.ErrorMessage) ? item.ErrorMessage : "\"\"";
@@ -211,12 +216,16 @@ namespace URLTester.Test
         /// <summary>
         /// Displays out the the console a list of errors that have occurred during the test execution 
         /// </summary>
-        public void OutPutErrorMessages()
+        public void OutputErrorMessages(OutputHandler handler)
         {
-            foreach(var error in ErrorMessages)
+            var messages = new string[ErrorMessages.Count];
+
+            for (int i = 0; i < ErrorMessages.Count; i++)
             {
-                Console.WriteLine(error.Message);
+                messages[i] = ErrorMessages[i].Message;
             }
+
+            handler(messages);
         }
     }
 
