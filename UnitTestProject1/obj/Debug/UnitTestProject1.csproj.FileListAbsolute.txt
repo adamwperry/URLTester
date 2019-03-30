@@ -1,2 +1,0 @@
-D:\projects\URLTester\UnitTestProject1\obj\Debug\UnitTestProject1.csprojAssemblyReference.cache
-D:\projects\URLTester\UnitTestProject1\obj\Debug\UnitTestProject1.csproj.CoreCompileInputs.cache
