@@ -8,6 +8,48 @@ using System.IO;
 [TestClass]
 public class Tests
 {
+    private static string _testDirectory;
+    private static string _sampleCsvFile;
+
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext context)
+    {
+        _testDirectory = $@"{Environment.GetEnvironmentVariable("SystemDrive")}\test";
+        _sampleCsvFile = $@"{_testDirectory}\sample.csv";
+
+        var csvData = new string[]
+        {
+            "URL,expectedRedirect",
+            "/blog,/new",
+            "/contact-us,/contact"
+        };
+
+
+        if (!Directory.Exists(_testDirectory))
+            Directory.CreateDirectory(_testDirectory);
+
+        if (!File.Exists(_sampleCsvFile))
+        {
+            File.Create(_sampleCsvFile).Dispose();
+            using (StreamWriter sw = File.CreateText(_sampleCsvFile))
+            {
+                foreach (var item in csvData)
+                {
+                    sw.WriteLine(item);
+                }
+
+                sw.Close();
+            }
+        }
+    }
+
+    [ClassCleanup]
+    public static void ClassCleanup()
+    {
+        if (File.Exists(_sampleCsvFile))
+            File.Delete(_sampleCsvFile);
+    }
+
     [TestMethod]
     public void Test_ParseArguments_Empty()
     {
@@ -62,7 +104,6 @@ public class Tests
         {
             Domain = "http://example.com",
             FilePath = @"badTextFile",
-            OutputText = @"C:\test\output.csv"
         };
 
         var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
@@ -85,7 +126,6 @@ public class Tests
         {
             Domain = "http://example.com",
             FilePath = @"D:\projects\URLTester\URLTester\301test.exe",
-            OutputText = @"C:\test\output.csv"
         };
 
         try
@@ -111,6 +151,56 @@ public class Tests
             if (File.Exists(args.FilePath))
                 File.Delete(args.FilePath);
         }
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_LoadFile_Success()
+    {
+        var args = new Arguments()
+        {
+            Domain = "http://example.com",
+            FilePath = _sampleCsvFile,
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        Assert.AreEqual(loadedFile, true);
+
+        testManager.OutputErrorMessages((string[] messages) =>
+        {
+            Assert.AreEqual(messages.Length, 0);
+        });
+
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestLinks_Fail()
+    {
+        var args = new Arguments()
+        {
+            Domain = "http://example.com",
+            FilePath = _sampleCsvFile,
+            OutputText = @"C:\test\output.csv"
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputErrorMessages((string[] messages) =>
+            {
+                Assert.AreEqual(messages[0], "An error occurred with this url - /blog | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /contact-us | The remote server returned an error: (404) Not Found.");
+            });
+        }
+
+
     }
 
     /// <summary>

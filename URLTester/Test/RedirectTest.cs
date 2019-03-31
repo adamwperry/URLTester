@@ -80,7 +80,7 @@ namespace UrlTester.Test
             foreach (var item in UrlList)
             {
                 var retval = TestLink(item);
-                if (returnValue == true && retval == false)
+                if (returnValue && !retval)
                 {
                     returnValue = retval;
                 }
@@ -98,10 +98,10 @@ namespace UrlTester.Test
         protected bool TestLink(UrlData item)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseUrl + item.Url);
-            string responseBody = String.Empty;
+            var responseBody = string.Empty;
             try
             {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
                     item.HeaderResponseCode = response.StatusCode;
                     item.ActualRedirect = response.ResponseUri;
@@ -111,21 +111,21 @@ namespace UrlTester.Test
                 {
                     item.Testfail = true;
                 }
-                return true;
             }
             catch (WebException webEx)
             {
-                ErrorMessages.Add(new ErrorMessage(String.Format("An error occurred with this url - {0} | {1}", item.Url, webEx.Message)));
-                item.ErrorMessage = string.Format("{0} -- {1}", webEx.Message, webEx.InnerException);
+                ErrorMessages.Add(new ErrorMessage($"An error occurred with this url - {item.Url} | {webEx.Message}"));
+                item.ErrorMessage = $"{webEx.Message} -- {webEx.InnerException}";
                 item.Testfail = true;
-                return false;
             }
+
+            return !item.Testfail;
         }
 
         public bool OutputResults()
         {
             //using a dictionary to store the output
-            var outPutList = new Dictionary<int, string>()
+            var outputList = new Dictionary<int, string>()
             {
                 {0, "Row Number, Test Result, Response Code, Response, url, expected url, actual url, error" }
             };
@@ -134,18 +134,18 @@ namespace UrlTester.Test
             var count = 1;
             foreach (var item in UrlList)
             {
-                outPutList.Add(count, BuildOutPutMessage(item, count));
+                outputList.Add(count, BuildOutPutMessage(item, count));
                 count++;
             }
 
             //creating the output file
             if (!string.IsNullOrEmpty(OutputFilePath))
             {
-                WriteOutputFile(outPutList);
+                WriteOutputFile(outputList);
             }
 
             //displaying the messages on the screen
-            foreach (var item in outPutList)
+            foreach (var item in outputList)
             {
                 Console.WriteLine(item.Value);
             }
