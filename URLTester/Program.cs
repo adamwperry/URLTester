@@ -1,51 +1,33 @@
-﻿using URLTester.Objects;
-using URLTester.Test;
+﻿using UrlTester.Objects;
+using UrlTester.Test;
 using System;
+using System.IO;
+using System.Text;
+using UrlTester.Output;
 
-namespace URLTester
+namespace UrlTester
 {
-    class Program
+    public class Program
     {
-
-
         static void Main(string[] args)
         {
             Console.WriteLine("URLTester version 1.1");
             Console.Write(Environment.NewLine);
 
-            if (args.Length == 0)
-            {
-                PrintHelp();
-                return;
-            }
+            var appArgs = Parsers.ArgumentParser.Parse(args);
             
-            var appArgs = ParseArguments(args);
-
-            if (appArgs.Help)
+            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath) || appArgs.Help)
             {
-                PrintHelp();
-                return;
-            }
-            
-            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath))
-            {
-                PrintMissingArguments();
-                PrintHelp();
+                if (!appArgs.Help) PrintMissingArguments(OutputManager.WriteMessagesToConsole);
+                PrintHelp(OutputManager.WriteMessagesToConsole);
+                Console.ReadLine();
                 return;
             }
 
-            IURLTest<UrlData> test = null;
-            if (appArgs.Mutlithreaded)
-            {
-                test = new ParallelRedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText);
-            }
-            else
-            {
-                test = new RedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText);
-            }
-
-
-            var testManager = new RedirectTestManager<UrlData>(test);
+            var testManager = new RedirectTestManager<UrlData>(
+                                appArgs.Mutlithreaded ?
+                                    new ParallelRedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText) :
+                                    new RedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText));
 
             Console.WriteLine("Loading File.....");
             Console.Write(Environment.NewLine);
@@ -53,9 +35,9 @@ namespace URLTester
             if (!testManager.LoadFile())
             {
                 //if errors then display them
-                testManager.OutPutErrorMessages();
+                testManager.OutputErrorMessages(OutputManager.WriteMessagesToConsole);
                 Console.ReadLine();
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine("Running.....");
@@ -71,85 +53,47 @@ namespace URLTester
 
             Console.WriteLine("Results.....");
             Console.Write(Environment.NewLine);
-            
 
-            testManager.OutPutResults();
+            testManager.OutputResults(OutputManager.WriteMessagesToConsoleAndFile);
             Console.ReadLine();
         }
 
-        /// <summary>
-        /// Parses the application args passed into the applicaiton
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns>Arguments Object</returns>
-        private static Arguments ParseArguments(string[] args)
-        {
-            try
-            {
-                var appArgs = new Arguments();
-
-                for (int i = 0; i < args.Length; i++)
-                {
-                    switch (args[i])
-                    {
-                        case "-f":
-                            i++;
-                            appArgs.FilePath = args[i];
-                            break;
-                        case "-d":
-                            i++;
-                            appArgs.Domain = args[i];
-                            break;
-                        case "-o":
-                            i++;
-                            appArgs.OutputText = args[i];
-                            break;
-                        case "-t":
-                            i++;
-                            appArgs.Mutlithreaded = true;
-                            break;
-                        case "-h":
-                            appArgs.Help = true;
-                            break;
-                    }
-                }
-                
-                return appArgs;
-            }
-            catch
-            {
-                return null;
-            }
-        }
 
         /// <summary>
         /// Prints the help man
         /// </summary>
-        private static void PrintHelp()
+        public static void PrintHelp(OutputHandler handler)
         {
-            Console.WriteLine("Usage: URLTester [-f] [-d] [-o] [-h]");
-            Console.WriteLine("");
-            Console.WriteLine("Options:");
-            Console.WriteLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
-            Console.WriteLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-            Console.WriteLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
-            Console.WriteLine("\t -t \t \t Runs test as a mutlithread operation.");
-            Console.WriteLine("\t -h Help \t Help Manual");
-            Console.WriteLine("");
-            Console.WriteLine("Sample Arguements");
-            Console.WriteLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
-            Console.ReadLine();
-        }
+            var output = new StringBuilder();
 
+            output.AppendLine("Usage: URLTester [-f] [-d] [-o] [-h]");
+            output.AppendLine("");
+            output.AppendLine("Options:");
+            output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
+            output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
+            output.AppendLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
+            output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
+            output.AppendLine("\t -h Help \t Help Manual");
+            output.AppendLine("");
+            output.AppendLine("Sample Arguments");
+            output.AppendLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
+
+            handler(new string[] { output.ToString() });
+        }
 
         /// <summary>
         /// Simple message informing use that some of the arguments are missing.
         /// </summary>
-        private static void PrintMissingArguments()
+        private static void PrintMissingArguments(OutputHandler handler)
         {
-            Console.WriteLine("Missing Arguments -- Please try again.");
-            Console.WriteLine("");
+            var output = new StringBuilder();
+            output.AppendLine("Missing Arguments -- Please try again.");
+            output.AppendLine("");
+
+            handler(new string[] { output.ToString() });
         }
+
+    
     }
 
 }

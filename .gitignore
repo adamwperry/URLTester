@@ -1,5 +1,7 @@
 /URLTester/obj/*
 /URLTester/bin/*
+/UnitTestProject1/bin/*
+/UnitTestProject1/obj/*
 URLTester/301test.csv
 URLTester/301test.json
 .vs/URLTester/v15/.suo

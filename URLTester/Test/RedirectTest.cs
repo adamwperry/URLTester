@@ -1,60 +1,66 @@
-﻿using URLTester.Objects;
+﻿using UrlTester.Objects;
 using Core.Objects;
 using Parsers;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using UrlTester.Output;
 
-namespace URLTester.Test
+namespace UrlTester.Test
 {
-    public class RedirectTest<T> : IURLTest<T>
+    public class RedirectTest<T> : IUrlTest<T> where T: IUrlData 
     {
         protected List<UrlData> UrlList;
         protected List<ErrorMessage> ErrorMessages;
-        protected readonly string BaseURL;
+        protected readonly string BaseUrl;
         protected readonly string FilePath;
-        protected readonly string OutpuFilePath;
+        protected readonly string OutputFilePath;
 
         //use this dictionary to determine the correct parser to the load the file.               
         private readonly Dictionary<string, IParser<T>> fileExtensions = new Dictionary<string, IParser<T>>
         {
-            {".CSV", new CSVParser<T>() },
-            {".JSON", new JSONParser<T>() }
-
+            {".CSV", new CSVParser<T>()},
+            {".JSON", new JSONParser<T>()}
         };
         
-        public RedirectTest(string baseURL, string filePath, string outPutFlePath)
+        public RedirectTest(string baseUrl, string filePath, string outputFilePath)
         {
-            BaseURL = baseURL;
+            BaseUrl = baseUrl;
             FilePath = filePath;
-            OutpuFilePath = outPutFlePath;
+            OutputFilePath = outputFilePath;
         }
 
         /// <summary>
-        /// Loads the proviide file (filepPath)
-        /// Uses the Json or CSV parser depending on the file extenions
+        /// Loads the provided file (filePath)
+        /// Uses the Json or CSV parser depending on the file extensions
         /// </summary>
         /// <returns></returns>
         public bool LoadFile()
         {
             ErrorMessages = new List<ErrorMessage>();
-
-            //create the correct parser based on the file extension
             IParser<T> parser = null;
+
+            //Lets check for file path existence before we try to grab extension
+            if (!File.Exists(FilePath))
+            {
+                ErrorMessages.Add(new ErrorMessage($"Specified file path, {FilePath}, does not exist.", true));
+                return false;
+            }
+
             fileExtensions.TryGetValue(Path.GetExtension(FilePath).ToUpper(), out parser);
 
-            if(parser == null)
+            if (parser == null)
             {
                 //todo... create a lib for the messages.
                 ErrorMessages.Add(new ErrorMessage("File Extension is not supported.", true));
-            } else
+            }
+            else
             {
                 var fileParser = new FileParser<T>(parser);
-                UrlList = fileParser.ParseFile<UrlData>(FilePath, ref ErrorMessages);
+                UrlList = fileParser.ParseFile<UrlData>(FilePath, ErrorMessages);
             }
 
-            if (ErrorMessages.Count >= 1)
+            if (ErrorMessages.Count > 0)
             {
                 return false;
             }
@@ -74,7 +80,7 @@ namespace URLTester.Test
             foreach (var item in UrlList)
             {
                 var retval = TestLink(item);
-                if (returnValue == true && retval == false)
+                if (returnValue && !retval)
                 {
                     returnValue = retval;
                 }
@@ -91,11 +97,11 @@ namespace URLTester.Test
         /// <returns>True for a successful test / False if the test attempt failed.</returns>
         protected bool TestLink(UrlData item)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseURL + item.Url);
-            string responseBody = String.Empty;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseUrl + item.Url);
+            var responseBody = string.Empty;
             try
             {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
                     item.HeaderResponseCode = response.StatusCode;
                     item.ActualRedirect = response.ResponseUri;
@@ -105,70 +111,35 @@ namespace URLTester.Test
                 {
                     item.Testfail = true;
                 }
-                return true;
             }
             catch (WebException webEx)
             {
-                ErrorMessages.Add(new ErrorMessage(String.Format("An error occurred with this url - {0} | {1}", item.Url, webEx.Message)));
-                item.ErrorMessage = string.Format("{0} -- {1}", webEx.Message, webEx.InnerException);
+                ErrorMessages.Add(new ErrorMessage($"An error occurred with this url - {item.Url} | {webEx.Message}"));
+                item.ErrorMessage = $"{webEx.Message} -- {webEx.InnerException}";
                 item.Testfail = true;
-                return false;
             }
+
+            return !item.Testfail;
         }
 
-        public bool OutPutResults()
+        public bool OutputResults(OutputHandler handler)
         {
-            //using a dictionary to store the output
-            var outPutList = new Dictionary<int, string>()
+            var outputList = new List<string>
             {
-                {0, "Row Number, Test Result, Response Code, Response, url, expected url, actual url, error" }
+                {"0, Row Number, Test Result, Response Code, Response, url, expected url, actual url, error" }
             };
             
             //build output dictionary 
             var count = 1;
             foreach (var item in UrlList)
             {
-                outPutList.Add(count, BuildOutPutMessage(item, count));
+                outputList.Add(BuildOutPutMessage(item, count));
                 count++;
             }
 
-            //creating the output file
-            if (!string.IsNullOrEmpty(OutpuFilePath))
-            {
-                WriteOutputFile(outPutList);
-            }
-
-            //displaying the messages on the screen
-            foreach (var item in outPutList)
-            {
-                Console.WriteLine(item.Value);
-            }
+            handler(outputList.ToArray(), OutputFilePath);
 
             return true;
-        }
-
-        /// <summary>
-        /// Exports the test results using the outPutText file path provided
-        /// </summary>
-        /// <param name="outPutList"></param>
-        private void WriteOutputFile(Dictionary<int, string> outPutList)
-        {
-            try
-            {
-                var newPath = MakeUnique(OutpuFilePath);
-
-                using (StreamWriter sw = File.CreateText(newPath.FullName))
-                {
-                    foreach (var item in outPutList)
-                    {
-                        sw.WriteLine(item.Value);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessages.Add(new ErrorMessage(ex.Message, true));
-            }
         }
         
         /// <summary>
@@ -178,7 +149,7 @@ namespace URLTester.Test
         /// <param name="item"></param>
         /// <param name="count"></param>
         /// <returns>string</returns>
-        private string BuildOutPutMessage(BaseUrlData item, int count)
+        private string BuildOutPutMessage(IUrlData item, int count)
         {
             var output = string.Empty;
             var errorMessage = !string.IsNullOrEmpty(item.ErrorMessage) ? item.ErrorMessage : "\"\"";
@@ -211,12 +182,16 @@ namespace URLTester.Test
         /// <summary>
         /// Displays out the the console a list of errors that have occurred during the test execution 
         /// </summary>
-        public void OutPutErrorMessages()
+        public void OutputErrorMessages(OutputHandler handler)
         {
-            foreach(var error in ErrorMessages)
+            var messages = new string[ErrorMessages.Count];
+
+            for (int i = 0; i < ErrorMessages.Count; i++)
             {
-                Console.WriteLine(error.Message);
+                messages[i] = ErrorMessages[i].Message;
             }
+
+            handler(messages, null);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿namespace URLTester.Objects
+﻿namespace UrlTester.Objects
 {
     /// <summary>
     /// A list of application arguments that can be provided at runtime.
