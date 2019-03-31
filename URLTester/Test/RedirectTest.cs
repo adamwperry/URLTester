@@ -1,10 +1,10 @@
 ﻿using UrlTester.Objects;
 using Core.Objects;
 using Parsers;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using UrlTester.Output;
 
 namespace UrlTester.Test
 {
@@ -122,59 +122,24 @@ namespace UrlTester.Test
             return !item.Testfail;
         }
 
-        public bool OutputResults()
+        public bool OutputResults(OutputHandler handler)
         {
-            //using a dictionary to store the output
-            var outputList = new Dictionary<int, string>()
+            var outputList = new List<string>
             {
-                {0, "Row Number, Test Result, Response Code, Response, url, expected url, actual url, error" }
+                {"0, Row Number, Test Result, Response Code, Response, url, expected url, actual url, error" }
             };
             
             //build output dictionary 
             var count = 1;
             foreach (var item in UrlList)
             {
-                outputList.Add(count, BuildOutPutMessage(item, count));
+                outputList.Add(BuildOutPutMessage(item, count));
                 count++;
             }
 
-            //creating the output file
-            if (!string.IsNullOrEmpty(OutputFilePath))
-            {
-                WriteOutputFile(outputList);
-            }
-
-            //displaying the messages on the screen
-            foreach (var item in outputList)
-            {
-                Console.WriteLine(item.Value);
-            }
+            handler(outputList.ToArray(), OutputFilePath);
 
             return true;
-        }
-
-        /// <summary>
-        /// Exports the test results using the outPutText file path provided
-        /// </summary>
-        /// <param name="outPutList"></param>
-        private void WriteOutputFile(Dictionary<int, string> outPutList)
-        {
-            try
-            {
-                var newPath = MakeUnique(OutputFilePath);
-
-                using (StreamWriter sw = File.CreateText(newPath.FullName))
-                {
-                    foreach (var item in outPutList)
-                    {
-                        sw.WriteLine(item.Value);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessages.Add(new ErrorMessage(ex.Message, true));
-            }
         }
         
         /// <summary>
@@ -226,7 +191,7 @@ namespace UrlTester.Test
                 messages[i] = ErrorMessages[i].Message;
             }
 
-            handler(messages);
+            handler(messages, null);
         }
     }
 

@@ -4,6 +4,7 @@ using UrlTester.Parsers;
 using UrlTester.Objects;
 using UrlTester.Test;
 using System.IO;
+using System.Text;
 
 [TestClass]
 public class Tests
@@ -72,6 +73,26 @@ public class Tests
         var parsedArgs = ArgumentParser.Parse(args);
 
         CompareObjectProperties(parsedArgs, expectedArgs);
+
+
+        var output = new StringBuilder();
+
+        output.AppendLine("Usage: URLTester [-f] [-d] [-o] [-h]");
+        output.AppendLine("");
+        output.AppendLine("Options:");
+        output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
+        output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
+        output.AppendLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
+        output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
+        output.AppendLine("\t -h Help \t Help Manual");
+        output.AppendLine("");
+        output.AppendLine("Sample Arguments");
+        output.AppendLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
+
+        UrlTester.Program.PrintHelp((string[] messages, string outputPath) => {
+            Assert.AreEqual(messages[0], output.ToString());
+        });
+
     }
 
     [TestMethod]
@@ -111,7 +132,7 @@ public class Tests
 
         Assert.AreEqual(loadedFile, false);
 
-        testManager.OutputErrorMessages((string[] messages) => 
+        testManager.OutputErrorMessages((string[] messages, string outputPath) => 
         {
             Assert.AreEqual(messages[0], $"Specified file path, {args.FilePath}, does not exist.");
         });
@@ -137,7 +158,7 @@ public class Tests
 
             Assert.AreEqual(loadedFile, false);
 
-            testManager.OutputErrorMessages((string[] messages) =>
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
                 Assert.AreEqual(messages[0], "File Extension is not supported.");
             });
@@ -168,7 +189,7 @@ public class Tests
 
         Assert.AreEqual(loadedFile, true);
 
-        testManager.OutputErrorMessages((string[] messages) =>
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
         {
             Assert.AreEqual(messages.Length, 0);
         });
@@ -193,15 +214,41 @@ public class Tests
         {
             Assert.AreEqual(testManager.TestLinks(), false);
 
-            testManager.OutputErrorMessages((string[] messages) =>
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
                 Assert.AreEqual(messages[0], "An error occurred with this url - /blog | The remote server returned an error: (404) Not Found.");
                 Assert.AreEqual(messages[1], "An error occurred with this url - /contact-us | The remote server returned an error: (404) Not Found.");
             });
         }
-
-
     }
+
+    [TestMethod]
+    public void Test_RedirectTest_OutputResults()
+    {
+        var args = new Arguments()
+        {
+            Domain = "http://example.com",
+            FilePath = _sampleCsvFile,
+            OutputText = @"C:\test\output.csv"
+        };
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            testManager.TestLinks();
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(args.OutputText, outputPath);
+                Assert.AreEqual(messages[0], "0, Row Number, Test Result, Response Code, Response, url, expected url, actual url, error");
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /blog, /new, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /contact-us, /contact, , The remote server returned an error: (404) Not Found. -- ");
+            });
+        }
+    }
+
+
 
     /// <summary>
     /// Loops through all object properties to do a shallow compare

@@ -1,10 +1,13 @@
 ﻿using UrlTester.Objects;
 using UrlTester.Test;
 using System;
+using System.IO;
+using System.Text;
+using UrlTester.Output;
 
 namespace UrlTester
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -13,10 +16,11 @@ namespace UrlTester
 
             var appArgs = Parsers.ArgumentParser.Parse(args);
             
-            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath))
+            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath) || appArgs.Help)
             {
-                PrintMissingArguments();
-                PrintHelp();
+                if (!appArgs.Help) PrintMissingArguments(OutputManager.WriteMessagesToConsole);
+                PrintHelp(OutputManager.WriteMessagesToConsole);
+                Console.ReadLine();
                 return;
             }
 
@@ -31,7 +35,7 @@ namespace UrlTester
             if (!testManager.LoadFile())
             {
                 //if errors then display them
-                testManager.OutputErrorMessages(WriteErrorMessagesToConsole);
+                testManager.OutputErrorMessages(OutputManager.WriteMessagesToConsole);
                 Console.ReadLine();
                 Environment.Exit(1);
             }
@@ -50,45 +54,46 @@ namespace UrlTester
             Console.WriteLine("Results.....");
             Console.Write(Environment.NewLine);
 
-            testManager.OutputResults();
+            testManager.OutputResults(OutputManager.WriteMessagesToConsoleAndFile);
             Console.ReadLine();
         }
-        
+
+
         /// <summary>
         /// Prints the help man
         /// </summary>
-        private static void PrintHelp()
+        public static void PrintHelp(OutputHandler handler)
         {
-            Console.WriteLine("Usage: URLTester [-f] [-d] [-o] [-h]");
-            Console.WriteLine("");
-            Console.WriteLine("Options:");
-            Console.WriteLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
-            Console.WriteLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-            Console.WriteLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
-            Console.WriteLine("\t -t \t \t Runs test as a multithread operation.");
-            Console.WriteLine("\t -h Help \t Help Manual");
-            Console.WriteLine("");
-            Console.WriteLine("Sample Arguments");
-            Console.WriteLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
-            Console.ReadLine();
+            var output = new StringBuilder();
+
+            output.AppendLine("Usage: URLTester [-f] [-d] [-o] [-h]");
+            output.AppendLine("");
+            output.AppendLine("Options:");
+            output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
+            output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
+            output.AppendLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
+            output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
+            output.AppendLine("\t -h Help \t Help Manual");
+            output.AppendLine("");
+            output.AppendLine("Sample Arguments");
+            output.AppendLine("\t" + @" -d https://www.example.com -f C:\301test.csv -o C:\output.csv");
+
+            handler(new string[] { output.ToString() });
         }
 
         /// <summary>
         /// Simple message informing use that some of the arguments are missing.
         /// </summary>
-        private static void PrintMissingArguments()
+        private static void PrintMissingArguments(OutputHandler handler)
         {
-            Console.WriteLine("Missing Arguments -- Please try again.");
-            Console.WriteLine("");
+            var output = new StringBuilder();
+            output.AppendLine("Missing Arguments -- Please try again.");
+            output.AppendLine("");
+
+            handler(new string[] { output.ToString() });
         }
 
-        private static void WriteErrorMessagesToConsole(string[] messages)
-        {
-            foreach (var message in messages)
-            {
-                Console.WriteLine(message);
-            }
-        }
+    
     }
 
 }

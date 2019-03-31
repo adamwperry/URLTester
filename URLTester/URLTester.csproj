@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Arguments.cs" />
+    <Compile Include="Output\OutputManager.cs" />
     <Compile Include="Parsers\ArgumentParser.cs" />
     <Compile Include="Parsers\JSONParser.cs" />
     <Compile Include="Test\ParallelRedirectTest.cs" />

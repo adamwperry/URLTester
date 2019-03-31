@@ -1,4 +1,5 @@
-﻿using Core.Objects;
+﻿using UrlTester.Output;
+using Core.Objects;
 using System.Collections.Generic;
 
 namespace UrlTester.Test
@@ -11,7 +12,7 @@ namespace UrlTester.Test
     {
         bool LoadFile();
         bool TestLinks();
-        bool OutputResults();
+        bool OutputResults(OutputHandler handler);
         void OutputErrorMessages(OutputHandler handler);
     }
     

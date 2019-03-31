@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UrlTester.Output;
+using System;
 using UrlTester.Objects;
 
 namespace UrlTester.Test
@@ -38,9 +39,9 @@ namespace UrlTester.Test
         /// Output a test results using IURLTest Class provided
         /// </summary>
         /// <returns></returns>
-        public bool OutputResults()
+        public bool OutputResults(OutputHandler handler)
         {
-            return _redirectTest.OutputResults();
+            return _redirectTest.OutputResults(handler);
         }
 
         /// <summary>
@@ -52,6 +53,6 @@ namespace UrlTester.Test
         }
     }
 
-    public delegate void OutputHandler(string[] messages);
+    
 
 }
