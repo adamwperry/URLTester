@@ -26,7 +26,7 @@ namespace UrlTester.Test
             Parallel.ForEach(UrlList, (item) =>
             {
                 var retval = TestLink(item);
-                if(returnValue == true && retval == false)
+                if(returnValue && !retval)
                 {
                     returnValue = retval;
                 }
