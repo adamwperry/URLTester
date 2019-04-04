@@ -1,9 +1,9 @@
 ﻿using UrlTester.Objects;
 using UrlTester.Test;
 using System;
-using System.IO;
 using System.Text;
 using UrlTester.Output;
+using URLTester.Objects;
 
 namespace UrlTester
 {
@@ -11,11 +11,11 @@ namespace UrlTester
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("URLTester version 1.1");
-            Console.Write(Environment.NewLine);
+
+            OutputProcessMessage(Messages.AppliationVersion);
 
             var appArgs = Parsers.ArgumentParser.Parse(args);
-            
+
             if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath) || appArgs.Help)
             {
                 if (!appArgs.Help) PrintMissingArguments(OutputManager.WriteMessagesToConsole);
@@ -29,8 +29,8 @@ namespace UrlTester
                                     new ParallelRedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText) :
                                     new RedirectTest<UrlData>(appArgs.Domain, appArgs.FilePath, appArgs.OutputText));
 
-            Console.WriteLine("Loading File.....");
-            Console.Write(Environment.NewLine);
+            OutputProcessMessage(Messages.LoadingFile);
+
 
             if (!testManager.LoadFile())
             {
@@ -40,8 +40,8 @@ namespace UrlTester
                 Environment.Exit(1);
             }
 
-            Console.WriteLine("Running.....");
-            Console.Write(Environment.NewLine);
+            OutputProcessMessage(Messages.Running);
+
 
             if (!testManager.TestLinks())
             {
@@ -51,13 +51,26 @@ namespace UrlTester
                 //testManager.OutPutErrorMessages();
             }
 
-            Console.WriteLine("Results.....");
-            Console.Write(Environment.NewLine);
+            OutputProcessMessage(Messages.Results);
 
             testManager.OutputResults(OutputManager.WriteMessagesToConsoleAndFile);
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Creates a message for the console using the OutputManager. 
+        /// This adds a new line to the end of the message.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void OutputProcessMessage(string message)
+        {
+            OutputManager.WriteMessagesToConsole(
+                new string[] {
+                    message,
+                    Environment.NewLine
+                }
+            );
+        }
 
         /// <summary>
         /// Prints the help man
@@ -71,7 +84,7 @@ namespace UrlTester
             output.AppendLine("Options:");
             output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
             output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-            output.AppendLine("\t -o \t \t Optional output csv file eg. C:\test\\output.csv");
+            output.AppendLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
             output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
             output.AppendLine("\t -h Help \t Help Manual");
             output.AppendLine("");
