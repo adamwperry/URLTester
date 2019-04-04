@@ -11,6 +11,7 @@ public class Tests
 {
     private static string _testDirectory;
     private static string _sampleCsvFile;
+    private static string _sampleJsonFile;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
@@ -42,6 +43,36 @@ public class Tests
                 sw.Close();
             }
         }
+
+        _sampleJsonFile = $@"{_testDirectory}\sample.json";
+
+        var jsonData = new string[]
+        {
+            "[",
+            "{",
+            "\"URL\": \"/sell\",",
+            "\"expectedRedirect\": \"https://example.com/sell\"",
+            "},",
+            "{",
+            "\"URL\": \"/service\",",
+            "\"expectedRedirect\": \"https://example.com/service\"",
+            "},",
+            "]",
+        };
+
+        if (!File.Exists(_sampleJsonFile))
+        {
+            File.Create(_sampleJsonFile).Dispose();
+            using (StreamWriter sw = File.CreateText(_sampleJsonFile))
+            {
+                foreach (var item in jsonData)
+                {
+                    sw.WriteLine(item);
+                }
+
+                sw.Close();
+            }
+        }
     }
 
     [ClassCleanup]
@@ -49,6 +80,9 @@ public class Tests
     {
         if (File.Exists(_sampleCsvFile))
             File.Delete(_sampleCsvFile);
+
+        if (File.Exists(_sampleJsonFile))
+            File.Delete(_sampleJsonFile);
     }
 
     [TestMethod]
@@ -82,7 +116,7 @@ public class Tests
         output.AppendLine("Options:");
         output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
         output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-        output.AppendLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
+        output.AppendLine("\t -o \t \t Optional output csv file eg. C:\test\\output.csv");
         output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
         output.AppendLine("\t -h Help \t Help Manual");
         output.AppendLine("");
@@ -175,7 +209,7 @@ public class Tests
     }
 
     [TestMethod]
-    public void Test_RedirectTest_LoadFile_Success()
+    public void Test_RedirectTest_LoadCSVFile_Success()
     {
         var args = new Arguments()
         {
@@ -197,7 +231,29 @@ public class Tests
     }
 
     [TestMethod]
-    public void Test_RedirectTest_TestLinks_Fail()
+    public void Test_RedirectTest_LoadJsonFile_Success()
+    {
+        var args = new Arguments()
+        {
+            Domain = "http://example.com",
+            FilePath = _sampleJsonFile,
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        Assert.AreEqual(loadedFile, true);
+
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+        {
+            Assert.AreEqual(messages.Length, 0);
+        });
+
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestCSVLinks_Fail()
     {
         var args = new Arguments()
         {
@@ -221,6 +277,33 @@ public class Tests
             });
         }
     }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestJsonLinks_Fail()
+    {
+        var args = new Arguments()
+        {
+            Domain = "http://example.com",
+            FilePath = _sampleJsonFile,
+            OutputText = @"C:\test\output.csv"
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[0], "An error occurred with this url - /sell | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /service | The remote server returned an error: (404) Not Found.");
+            });
+        }
+    }
+
 
     [TestMethod]
     public void Test_RedirectTest_OutputResults()

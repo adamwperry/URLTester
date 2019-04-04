@@ -71,7 +71,7 @@ namespace UrlTester
             output.AppendLine("Options:");
             output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
             output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-            output.AppendLine(@"\t -o \t \t Optional output csv file eg. C:\test\output.csv");
+            output.AppendLine("\t -o \t \t Optional output csv file eg. C:\test\\output.csv");
             output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
             output.AppendLine("\t -h Help \t Help Manual");
             output.AppendLine("");
