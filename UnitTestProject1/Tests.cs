@@ -9,13 +9,18 @@ using System.Text;
 [TestClass]
 public class Tests
 {
+    private static string _domain;
     private static string _testDirectory;
     private static string _sampleCsvFile;
     private static string _sampleJsonFile;
+    private static string _outputFile;
+
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
     {
+        _domain = @"http://localhost:1337/";
+        _outputFile = @"C:\test\output.csv";
         _testDirectory = $@"{Environment.GetEnvironmentVariable("SystemDrive")}\test";
         _sampleCsvFile = $@"{_testDirectory}\sample.csv";
 
@@ -116,7 +121,7 @@ public class Tests
         output.AppendLine("Options:");
         output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
         output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
-        output.AppendLine("\t -o \t \t Optional output csv file eg. C:\test\\output.csv");
+        output.AppendLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
         output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
         output.AppendLine("\t -h Help \t Help Manual");
         output.AppendLine("");
@@ -157,7 +162,7 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = @"badTextFile",
         };
 
@@ -166,11 +171,11 @@ public class Tests
 
         Assert.AreEqual(loadedFile, false);
 
-        testManager.OutputErrorMessages((string[] messages, string outputPath) => 
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
         {
             Assert.AreEqual(messages[0], $"Specified file path, {args.FilePath}, does not exist.");
         });
-        
+
 
     }
 
@@ -179,7 +184,7 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = @"D:\projects\URLTester\URLTester\301test.exe",
         };
 
@@ -213,7 +218,7 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = _sampleCsvFile,
         };
 
@@ -235,8 +240,9 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = _sampleJsonFile,
+            OutputText = _outputFile
         };
 
 
@@ -257,9 +263,9 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = _sampleCsvFile,
-            OutputText = @"C:\test\output.csv"
+            OutputText = _outputFile
         };
 
 
@@ -269,6 +275,8 @@ public class Tests
         if (loadedFile)
         {
             Assert.AreEqual(testManager.TestLinks(), false);
+
+
 
             testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
@@ -283,9 +291,9 @@ public class Tests
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = _sampleJsonFile,
-            OutputText = @"C:\test\output.csv"
+            OutputText = _outputFile
         };
 
 
@@ -312,7 +320,7 @@ public class Tests
         {
             Domain = "http://example.com",
             FilePath = _sampleCsvFile,
-            OutputText = @"C:\test\output.csv"
+            OutputText = _outputFile
         };
 
         var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
