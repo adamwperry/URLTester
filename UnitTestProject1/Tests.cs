@@ -19,7 +19,7 @@ public class Tests
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
     {
-        _domain = @"http://localhost:1337/";
+        _domain = @"http://localhost:3000";
         _outputFile = @"C:\test\output.csv";
         _testDirectory = $@"{Environment.GetEnvironmentVariable("SystemDrive")}\test";
         _sampleCsvFile = $@"{_testDirectory}\sample.csv";
@@ -27,14 +27,21 @@ public class Tests
         var csvData = new string[]
         {
             "URL,expectedRedirect",
-            "/blog,/new",
-            "/contact-us,/contact"
+            "/verify,http://localhost:3000/test",
+            "/help,http://localhost:3000/faq",
+            "/,http://localhost:3000/test",
+            "/service,http://localhost:3000/service1",
+            "/blog,http://localhost:3000/",
+            "/contact-us,http://localhost:3000/contact",
+            "/email-us,http://localhost:3000/emmail",
         };
 
+        //running into an issue on test during debugging the files still exist.
+        ClassCleanup(); 
 
         if (!Directory.Exists(_testDirectory))
             Directory.CreateDirectory(_testDirectory);
-
+        
         if (!File.Exists(_sampleCsvFile))
         {
             File.Create(_sampleCsvFile).Dispose();
@@ -55,12 +62,32 @@ public class Tests
         {
             "[",
             "{",
-            "\"URL\": \"/sell\",",
-            "\"expectedRedirect\": \"https://example.com/sell\"",
+            "\"URL\": \"/verify\",",
+            "\"expectedRedirect\": \"http://localhost:3000/test\"",
+            "},",
+            "{",
+            "\"URL\": \"/help\",",
+            "\"expectedRedirect\": \"http://localhost:3000/faq\"",
+            "},",
+            "{",
+            "\"URL\": \"/\",",
+            "\"expectedRedirect\": \"http://localhost:3000/test\"",
             "},",
             "{",
             "\"URL\": \"/service\",",
-            "\"expectedRedirect\": \"https://example.com/service\"",
+            "\"expectedRedirect\": \"http://localhost:3000/service1\"",
+            "},",
+            "{",
+            "\"URL\": \"/blog\",",
+            "\"expectedRedirect\": \"http://localhost:3000/\"",
+            "},",
+            "{",
+            "\"URL\": \"/contact-us\",",
+            "\"expectedRedirect\": \"http://localhost:3000/contact\"",
+            "},",
+            "{",
+            "\"URL\": \"/email-us\",",
+            "\"expectedRedirect\": \"http://localhost:3000/emmail\"",
             "},",
             "]",
         };
@@ -280,8 +307,39 @@ public class Tests
 
             testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
-                Assert.AreEqual(messages[0], "An error occurred with this url - /blog | The remote server returned an error: (404) Not Found.");
-                Assert.AreEqual(messages[1], "An error occurred with this url - /contact-us | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[0], "An error occurred with this url - /verify | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /help | The remote server returned an error: (404) Not Found.");
+            });
+        }
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestCSVLinks_All()
+    {
+        var args = new Arguments()
+        {
+            Domain = _domain,
+            FilePath = _sampleCsvFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
             });
         }
     }
@@ -306,19 +364,49 @@ public class Tests
 
             testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
-                Assert.AreEqual(messages[0], "An error occurred with this url - /sell | The remote server returned an error: (404) Not Found.");
-                Assert.AreEqual(messages[1], "An error occurred with this url - /service | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[0], "An error occurred with this url - /verify | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /help | The remote server returned an error: (404) Not Found.");
             });
         }
     }
 
+    [TestMethod]
+    public void Test_RedirectTest_TestJsonLinks_All()
+    {
+        var args = new Arguments()
+        {
+            Domain = _domain,
+            FilePath = _sampleJsonFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
 
     [TestMethod]
     public void Test_RedirectTest_OutputResults()
     {
         var args = new Arguments()
         {
-            Domain = "http://example.com",
+            Domain = _domain,
             FilePath = _sampleCsvFile,
             OutputText = _outputFile
         };
@@ -333,8 +421,13 @@ public class Tests
             {
                 Assert.AreEqual(args.OutputText, outputPath);
                 Assert.AreEqual(messages[0], "0, Row Number, Test Result, Response Code, Response, url, expected url, actual url, error");
-                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /blog, /new, , The remote server returned an error: (404) Not Found. -- ");
-                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /contact-us, /contact, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
             });
         }
     }
