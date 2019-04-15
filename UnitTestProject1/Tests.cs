@@ -402,6 +402,44 @@ public class Tests
     }
 
     [TestMethod]
+    public void Test_RedirectTest_TestJsonLinks_MultiThreaded()
+    {
+        var args = new Arguments()
+        {
+            Domain = _domain,
+            FilePath = _sampleJsonFile,
+            OutputText = _outputFile, 
+            Mutlithreaded = true
+        };
+
+        var testManager = new RedirectTestManager<UrlData>(
+                    args.Mutlithreaded ?
+                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText) :
+                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+
+
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
+
+
+
+    [TestMethod]
     public void Test_RedirectTest_OutputResults()
     {
         var args = new Arguments()
