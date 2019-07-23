@@ -1,6 +1,4 @@
 ﻿using UrlTester.Output;
-using Core.Objects;
-using System.Collections.Generic;
 
 namespace UrlTester.Test
 {
@@ -11,7 +9,7 @@ namespace UrlTester.Test
     public interface IUrlTest<T>
     {
         bool LoadFile();
-        bool TestLinks();
+        bool TestLinks(OutputProgressHandler handle);
         bool OutputResults(OutputHandler handler);
         void OutputErrorMessages(OutputHandler handler);
     }

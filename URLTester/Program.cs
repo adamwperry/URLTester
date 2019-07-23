@@ -43,7 +43,7 @@ namespace UrlTester
             OutputProcessMessage(Messages.Running);
 
 
-            if (!testManager.TestLinks())
+            if (!testManager.TestLinks(OutputManager.WriteProgressToConsole))
             {
                 //turning off now -- displaying on screen and saving in csv
                 //Console.WriteLine("Errors.....");

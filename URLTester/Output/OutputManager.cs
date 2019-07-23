@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using _URLTester.Output;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UrlTester.Output
 {
@@ -36,7 +33,14 @@ namespace UrlTester.Output
 
             WriteMessagesToConsole(messages);
         }
+
+        public static void WriteProgressToConsole(int currentIndex, int totalCount, string currentItem = null)
+        {
+            var bar = new ProgessBar(totalCount);
+            bar.UpdateProgressBar(currentIndex, currentItem);
+        }
     }
 
     public delegate void OutputHandler(string[] messages, string outputPath = null);
+    public delegate void OutputProgressHandler(int currCount, int totalCount, string currentItem = null);
 }

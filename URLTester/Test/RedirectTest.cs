@@ -72,18 +72,24 @@ namespace UrlTester.Test
         /// Execute the list of url test that have been setup
         /// </summary>
         /// <returns>True if no errors occurred / False if an error has occurred during testing.</returns>
-        public virtual bool TestLinks()
+        public virtual bool TestLinks(OutputProgressHandler  handler)
         {
             ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
             
+            var i = 0;
+            var totalCount = UrlList.Count;
             foreach (var item in UrlList)
             {
+                handler?.Invoke(i, totalCount, item.Url);
+
                 var retval = TestLink(item);
                 if (returnValue && !retval)
                 {
                     returnValue = retval;
                 }
+
+                i++;
             }
      
             return returnValue;

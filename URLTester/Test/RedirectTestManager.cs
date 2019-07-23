@@ -30,9 +30,9 @@ namespace UrlTester.Test
         /// Test the urls in a test file using IURLTest Class provided
         /// </summary>
         /// <returns></returns>
-        public bool TestLinks()
+        public bool TestLinks(OutputProgressHandler handler = null)
         {
-            return _redirectTest.TestLinks();
+            return _redirectTest.TestLinks(handler);
         }
 
         /// <summary>
