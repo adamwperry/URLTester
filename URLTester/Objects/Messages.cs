@@ -11,7 +11,9 @@ namespace URLTester.Objects
     /// </summary>
     public static class Messages
     {
-        public const string AppliationVersion = "URLTester version 1.2";
+        public const string ApplicationName = "URLTester";
+        public const string ApplicationVersion   = "1.2.1";
+        public const string ApplicationTitle = ApplicationName +" " + ApplicationVersion;
         public const string Ellipsis = "...";
         public const string LoadingFile = "Loading File" + Ellipsis;
         public const string Running = "Running" + Ellipsis;

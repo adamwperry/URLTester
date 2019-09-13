@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using UrlTester.Output;
+using _URLTester.Output;
 
 namespace UrlTester.Test
 {
-    public class RedirectTest<T> : IUrlTest<T> where T: IUrlData 
+    public class RedirectTest<T> : IUrlTest<T> where T : IUrlData
     {
         protected List<UrlData> UrlList;
         protected List<ErrorMessage> ErrorMessages;
@@ -76,13 +77,20 @@ namespace UrlTester.Test
         {
             ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
-            
-            foreach (var item in UrlList)
+
+            var i = 1;
+            using (var progress = new ConsoleProgressBar(UrlList.Count))
             {
-                var retval = TestLink(item);
-                if (returnValue && !retval)
+                foreach (var item in UrlList)
                 {
-                    returnValue = retval;
+                    var retval = TestLink(item);
+                    if (returnValue && !retval)
+                    {
+                        returnValue = retval;
+                    }
+                    
+                    progress.Report(i, item.Url);
+                    i++;
                 }
             }
      
