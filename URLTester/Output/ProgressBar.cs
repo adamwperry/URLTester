@@ -3,19 +3,8 @@ using System.Threading;
 
 namespace _URLTester.Output
 {
-    public interface IProgressBar
-    {
-        //ConsoleColor ProgressBarColor { get; set; }
-        //ConsoleColor ProgressBarBackgroundColor { get; set; }
-        //ConsoleColor ProgressCurrentItemColor { get; set; }
-
- 
-        //void Report(int currentIndex, string currentItem);
-
-
-    }
     
-    public class ConsoleProgressBar : IProgressBar, IDisposable
+    public class ConsoleProgressBar : IDisposable
     {
         private const int blockCount = 10;
         private readonly int TotalBlocksWidth, BlockIncrement, TotalCount;
@@ -63,9 +52,7 @@ namespace _URLTester.Output
                 ResetTimer();
             }
         }
-
-
-
+        
         private void TimerHandler(object state)
         {
             lock (timer)
@@ -85,7 +72,6 @@ namespace _URLTester.Output
             DrawTotals();
             DrawOutput(curItem);
         }
-
 
         private void CreateBar()
         {
