@@ -5,7 +5,7 @@ namespace UrlTester.Parsers
     public class ArgumentParser
     {
         /// <summary>
-        /// Parses the application args passed into the applicaiton
+        /// Parses the application args passed into the application
         /// </summary>
         /// <param name="args"></param>
         /// <returns>Arguments Object</returns>

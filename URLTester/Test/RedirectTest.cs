@@ -188,7 +188,7 @@ namespace UrlTester.Test
 
 
         /// <summary>
-        /// Displays out the the console a list of errors that have occurred during the test execution 
+        /// Displays out the console a list of errors that have occurred during the test execution 
         /// </summary>
         public void OutputErrorMessages(OutputHandler handler)
         {

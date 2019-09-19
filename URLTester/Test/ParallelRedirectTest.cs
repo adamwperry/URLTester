@@ -8,7 +8,7 @@ using _URLTester.Output;
 namespace UrlTester.Test
 {
     /// <summary>
-    /// Executes the URL test using a Parallel foreach to take advantage of multithreading
+    /// Executes the URL test using a Parallel for each to take advantage of multi-threading
     /// Inherits all other functions from RedirectTest
     /// </summary>
     /// <typeparam name="T"></typeparam>
