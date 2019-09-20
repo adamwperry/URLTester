@@ -3,16 +3,37 @@ using System.Threading;
 
 namespace _URLTester.Output
 {
-    
+
+    /// <summary>
+    /// Contains the progress bar colors and sizes so they can be overridden. 
+    /// </summary>
+    public struct ConsoleProgressBarArgs
+    {
+        ConsoleColor? progressBarColor;
+        public ConsoleColor ProgressBarColor { get { return progressBarColor ?? ConsoleColor.Blue; } set { progressBarColor = value; } }
+
+        ConsoleColor? progressBarUnfilledColor;
+        public ConsoleColor ProgressBarUnfilledColor { get { return progressBarUnfilledColor ?? ConsoleColor.Gray; } set { progressBarUnfilledColor = value; } }
+
+        ConsoleColor? consoleBackgroundColor;
+        public ConsoleColor ConsoleBackgroundColor { get { return consoleBackgroundColor ?? ConsoleColor.Black; } set { consoleBackgroundColor = value; } }
+
+        ConsoleColor? progressCurrentItemColor;
+        public ConsoleColor ProgressCurrentItemColor { get { return progressCurrentItemColor ?? ConsoleColor.Cyan; } set { progressCurrentItemColor = value; } }
+
+        ConsoleColor? consoleFontColor;
+        public ConsoleColor ConsoleFontColor { get { return consoleFontColor ?? ConsoleColor.Gray; } set { consoleFontColor = value; } }
+
+        int? progressBarBlockSize;
+        public int ProgressBarBlockSize { get { return progressBarBlockSize ?? 30; } set { progressBarBlockSize = value; } }
+    }
+
     public class ConsoleProgressBar : IDisposable
     {
-        private const int blockCount = 10;
         private readonly int TotalBlocksWidth, BlockIncrement, TotalCount;
 
-        private ConsoleColor ProgressBarColor { get; set; }
-        private ConsoleColor ProgressBarBackgroundColor { get; set; }
-        private ConsoleColor ProgressCurrentItemColor { get; set; }
-        
+        private readonly ConsoleProgressBarArgs barArgs;
+
         private readonly TimeSpan animationInterval = TimeSpan.FromSeconds(1.0 / 8);
         private readonly Timer timer;
 
@@ -32,16 +53,19 @@ namespace _URLTester.Output
             public int X { get { return x ?? 0; } set { x = value; } }
         }
 
-        public ConsoleProgressBar(int totalCount, ConsoleColor progressBarColor = ConsoleColor.Blue, ConsoleColor progressBarBackgroundColor = ConsoleColor.Black, ConsoleColor progressCurrentItemColor = ConsoleColor.Cyan, int progressBarBlockSize = 30)
+        /// <summary>
+        /// Sets up the progress bar by accepting the total items count, and the ConsoleProgressBarArgs. 
+        /// </summary>
+        /// <param name="totalCount">required total count of items.</param>
+        /// <param name="args">This provides a default setup and is only required when a modification is need to the bar.</param>
+        public ConsoleProgressBar(int totalCount, ConsoleProgressBarArgs args = new ConsoleProgressBarArgs())
         {
             TotalCount = totalCount;
 
-            ProgressBarColor = progressBarColor;
-            ProgressBarBackgroundColor = progressBarBackgroundColor;
-            ProgressCurrentItemColor = progressCurrentItemColor;
-            
-            TotalBlocksWidth = progressBarBlockSize;
-            BlockIncrement = progressBarBlockSize / 6;
+            barArgs = args;
+ 
+            TotalBlocksWidth = args.ProgressBarBlockSize;
+            BlockIncrement = TotalBlocksWidth / 6;
 
             points = new BarPoints();
 
@@ -65,14 +89,22 @@ namespace _URLTester.Output
             }
         }
 
+
+        /// <summary>
+        /// Updates the text on the screen, uses the current item and current index.
+        /// </summary>
+        /// <param name="curItem"></param>
+        /// <param name="curIndex"></param>
         private void UpdateText(string curItem, double curIndex)
         {
             CreateBar();
             UpdateBar(curIndex);
-            DrawTotals();
             DrawOutput(curItem);
         }
 
+        /// <summary>
+        /// Creates the bar container
+        /// </summary>
         private void CreateBar()
         {
             Console.CursorVisible = false;
@@ -84,45 +116,48 @@ namespace _URLTester.Output
             Console.CursorLeft = 1;
         }
 
+        /// <summary>
+        /// Updates the bar using the current index.
+        /// </summary>
+        /// <param name="curIndex"></param>
         private void UpdateBar(double curIndex)
         {
             var chunksComplete = (int)(TotalBlocksWidth * (Convert.ToDouble(curIndex) / TotalCount));
 
-            Console.BackgroundColor = ProgressBarColor;
+            Console.BackgroundColor = barArgs.ProgressBarColor;
             Console.Write("".PadRight(chunksComplete));
 
-            Console.BackgroundColor = ConsoleColor.Gray;
+            Console.BackgroundColor = barArgs.ProgressBarUnfilledColor;
             Console.Write("".PadRight(TotalBlocksWidth - chunksComplete));
 
         }
-
-        private void DrawTotals()
-        {
-            Console.CursorLeft = TotalBlocksWidth + BlockIncrement;
-            Console.BackgroundColor = ProgressBarBackgroundColor;
-        }
-
+        
+        /// <summary>
+        /// Creates the blocks in the bar and creates the n out of n string.
+        /// </summary>
+        /// <param name="curItem"></param>
         private void DrawOutput(string curItem)
         {
+            Console.CursorLeft = TotalBlocksWidth + BlockIncrement;
+            Console.BackgroundColor = barArgs.ConsoleBackgroundColor;
+
             string output = currentIndex.ToString() + " of " + TotalCount.ToString();
 
-            var percentageComplete = CalculatePercentageComplete();
+            var percentageComplete = (int)(0.5f + ((100f * currentIndex) / TotalCount));
 
             Console.Write(output.PadRight(15) + $"%{percentageComplete}");
             Console.WriteLine("\n \n");
 
 
             ClearCurrentConsoleLine();
-            Console.ForegroundColor = ProgressCurrentItemColor;
+            Console.ForegroundColor = barArgs.ProgressCurrentItemColor;
             Console.WriteLine($"{curItem}");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = barArgs.ConsoleFontColor;
         }
-
-        private int CalculatePercentageComplete()
-        {
-            return (int)(0.5f + ((100f * currentIndex) / TotalCount));
-        }
-
+        
+        /// <summary>
+        /// Used to clear the current console line from the previous string.
+        /// </summary>
         private void ClearCurrentConsoleLine()
         {
             int currentLineCursor = Console.CursorTop;
@@ -147,6 +182,7 @@ namespace _URLTester.Output
                 disposed = true;
                 UpdateText(string.Empty, 0);
                 Console.CursorVisible = true;
+                timer.Dispose();
             }
         }
 
