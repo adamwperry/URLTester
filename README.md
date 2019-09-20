@@ -59,4 +59,4 @@ app.get('/contact', (req, res) => res.send('contact'));
 ```
 
 ### Version Changes
-**1.2.1** - Added a progress bar to the applicaiton.
+**1.2.1** - Added a progress bar to the application.
