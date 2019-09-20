@@ -1,14 +1,14 @@
 ﻿using UrlTester.Objects;
 using Core.Objects;
-using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
+using System.Threading;
+using _URLTester.Output;
 
 namespace UrlTester.Test
 {
     /// <summary>
-    /// Executes the URL test using a Parallel foreach to take advantage of multithreading
+    /// Executes the URL test using a Parallel for each to take advantage of multi-threading
     /// Inherits all other functions from RedirectTest
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -22,15 +22,22 @@ namespace UrlTester.Test
         {
             ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
-            
-            Parallel.ForEach(UrlList, (item) =>
+
+            var i = 1;
+            using (var progress = new ConsoleProgressBar(UrlList.Count))
             {
-                var retval = TestLink(item);
-                if(returnValue && !retval)
+                Parallel.ForEach(UrlList, (item) =>
                 {
-                    returnValue = retval;
-                }
-            });
+                    var retval = TestLink(item);
+                    if (returnValue && !retval)
+                    {
+                        returnValue = retval;
+                    }
+
+                    progress.Report(i, item.Url);
+                    Interlocked.Increment(ref i);
+                });
+            }
 
             return returnValue;
         }

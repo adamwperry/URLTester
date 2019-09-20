@@ -12,7 +12,7 @@ namespace UrlTester
         static void Main(string[] args)
         {
 
-            OutputProcessMessage(Messages.AppliationVersion);
+            OutputProcessMessage(Messages.ApplicationTitle);
 
             var appArgs = Parsers.ArgumentParser.Parse(args);
 
