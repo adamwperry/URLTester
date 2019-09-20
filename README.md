@@ -57,3 +57,6 @@ app.get('/contact-us', (req, res, next) => {
 });
 app.get('/contact', (req, res) => res.send('contact'));
 ```
+
+### Version Changes
+**1.2.1** - Added a progress bar to the applicaiton.
