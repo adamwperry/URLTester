@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using _URLTester.Output;
+using System.Linq;
 
 namespace UrlTester.Test
 {
@@ -24,7 +25,7 @@ namespace UrlTester.Test
             var returnValue = true;
 
             var i = 1;
-            using (var progress = new ConsoleProgressBar(UrlList.Count))
+            using (var progress = new ConsoleProgressBar(UrlList.Count()))
             {
                 Parallel.ForEach(UrlList, (item) =>
                 {
