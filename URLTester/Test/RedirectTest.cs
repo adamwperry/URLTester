@@ -6,12 +6,13 @@ using System.IO;
 using System.Net;
 using UrlTester.Output;
 using _URLTester.Output;
+using System.Linq;
 
 namespace UrlTester.Test
 {
     public class RedirectTest<T> : IUrlTest<T> where T : IUrlData
     {
-        protected List<UrlData> UrlList;
+        protected IEnumerable<IUrlData> UrlList;
         protected List<ErrorMessage> ErrorMessages;
         protected readonly string BaseUrl;
         protected readonly string FilePath;
@@ -58,7 +59,14 @@ namespace UrlTester.Test
             else
             {
                 var fileParser = new FileParser<T>(parser);
-                UrlList = fileParser.ParseFile<UrlData>(FilePath, ErrorMessages);
+                //if base URL is empty then use the UrlDomainData class
+                if (string.IsNullOrEmpty(BaseUrl))
+                {
+                    UrlList = fileParser.ParseFile<UrlDomainData>(FilePath, ErrorMessages);
+                } else
+                {
+                    UrlList = fileParser.ParseFile<UrlData>(FilePath, ErrorMessages);
+                }
             }
 
             if (ErrorMessages.Count > 0)
@@ -79,7 +87,8 @@ namespace UrlTester.Test
             var returnValue = true;
 
             var i = 1;
-            using (var progress = new ConsoleProgressBar(UrlList.Count))
+
+            using (var progress = new ConsoleProgressBar(UrlList.Count()))
             {
                 foreach (var item in UrlList)
                 {
@@ -88,27 +97,25 @@ namespace UrlTester.Test
                     {
                         returnValue = retval;
                     }
-                    
+
                     progress.Report(i, item.Url);
                     i++;
                 }
             }
-     
+
             return returnValue;
         }
-
 
         /// <summary>
         /// Test the url data provided
         /// </summary>
         /// <param name="item">UrlData </param>
         /// <returns>True for a successful test / False if the test attempt failed.</returns>
-        protected bool TestLink(UrlData item)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseUrl + item.Url);
-            var responseBody = string.Empty;
+        protected bool TestLink(IUrlData item)
+        {        
             try
             {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(item.GetURL(BaseUrl));
                 using (var response = (HttpWebResponse)request.GetResponse())
                 {
                     item.HeaderResponseCode = response.StatusCode;

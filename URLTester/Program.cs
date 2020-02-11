@@ -16,7 +16,7 @@ namespace UrlTester
 
             var appArgs = Parsers.ArgumentParser.Parse(args);
 
-            if (string.IsNullOrEmpty(appArgs.Domain) || string.IsNullOrEmpty(appArgs.FilePath) || appArgs.Help)
+            if (string.IsNullOrEmpty(appArgs.FilePath) || appArgs.Help)
             {
                 if (!appArgs.Help) PrintMissingArguments(OutputManager.WriteMessagesToConsole);
                 PrintHelp(OutputManager.WriteMessagesToConsole);
@@ -83,7 +83,7 @@ namespace UrlTester
             output.AppendLine("");
             output.AppendLine("Options:");
             output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
-            output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
+            output.AppendLine("\t -d \t \t Optional Hostname Domain eg. https://www.example.com - The host name can be included as a domain property in the source data");
             output.AppendLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
             output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
             output.AppendLine("\t -h Help \t Help Manual");
