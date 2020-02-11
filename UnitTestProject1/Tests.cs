@@ -11,8 +11,8 @@ public class Tests
 {
     private static string _domain;
     private static string _testDirectory;
-    private static string _sampleCsvFile;
-    private static string _sampleJsonFile;
+    private static string _sampleCsvFile, _sampleDomainCsvFile;
+    private static string _sampleJsonFile, _sampleDomainJsonFile;
     private static string _outputFile;
 
 
@@ -23,6 +23,7 @@ public class Tests
         _outputFile = @"C:\test\output.csv";
         _testDirectory = $@"{Environment.GetEnvironmentVariable("SystemDrive")}\test";
         _sampleCsvFile = $@"{_testDirectory}\sample.csv";
+        _sampleDomainCsvFile = $@"{_testDirectory}\sampleDomain.csv";
 
         var csvData = new string[]
         {
@@ -36,27 +37,59 @@ public class Tests
             "/email-us,http://localhost:3000/emmail",
         };
 
+
+        var csvDataDomain = new string[]
+        {
+            "domain, URL,expectedRedirect",
+            _domain + ",/verify,http://localhost:3000/test",
+            _domain + ",/help,http://localhost:3000/faq",
+            _domain + ",/,http://localhost:3000/test",
+            _domain + ",/service,http://localhost:3000/service1",
+            _domain + ",/blog,http://localhost:3000/",
+            _domain + ",/contact-us,http://localhost:3000/contact",
+            _domain + ",/email-us,http://localhost:3000/emmail",
+        };
+
         //running into an issue on test during debugging the files still exist.
         ClassCleanup(); 
 
         if (!Directory.Exists(_testDirectory))
             Directory.CreateDirectory(_testDirectory);
-        
-        if (!File.Exists(_sampleCsvFile))
-        {
-            File.Create(_sampleCsvFile).Dispose();
-            using (StreamWriter sw = File.CreateText(_sampleCsvFile))
-            {
-                foreach (var item in csvData)
-                {
-                    sw.WriteLine(item);
-                }
 
-                sw.Close();
-            }
-        }
+        //if (!File.Exists(_sampleCsvFile))
+        //{
+        //    File.Create(_sampleCsvFile).Dispose();
+        //    using (StreamWriter sw = File.CreateText(_sampleCsvFile))
+        //    {
+        //        foreach (var item in csvData)
+        //        {
+        //            sw.WriteLine(item);
+        //        }
+
+        //        sw.Close();
+        //    }
+        //}
+
+        //if (!File.Exists(_sampleDomainCsvFile))
+        //{
+        //    File.Create(_sampleDomainCsvFile).Dispose();
+        //    using (StreamWriter sw = File.CreateText(_sampleDomainCsvFile))
+        //    {
+        //        foreach (var item in csvDataDomain)
+        //        {
+        //            sw.WriteLine(item);
+        //        }
+
+        //        sw.Close();
+        //    }
+        //}
+
+        CreateFilet(_sampleCsvFile, csvData);
+        CreateFilet(_sampleDomainCsvFile, csvDataDomain);
+
 
         _sampleJsonFile = $@"{_testDirectory}\sample.json";
+        _sampleDomainJsonFile = $@"{_testDirectory}\sampleDomain.json";
 
         var jsonData = new string[]
         {
@@ -92,19 +125,52 @@ public class Tests
             "]",
         };
 
-        if (!File.Exists(_sampleJsonFile))
-        {
-            File.Create(_sampleJsonFile).Dispose();
-            using (StreamWriter sw = File.CreateText(_sampleJsonFile))
-            {
-                foreach (var item in jsonData)
-                {
-                    sw.WriteLine(item);
-                }
 
-                sw.Close();
-            }
-        }
+        var jsonDomainData = new string[]
+{
+            "[",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/verify\",",
+            "\"expectedRedirect\": \"http://localhost:3000/test\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/help\",",
+            "\"expectedRedirect\": \"http://localhost:3000/faq\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/\",",
+            "\"expectedRedirect\": \"http://localhost:3000/test\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/service\",",
+            "\"expectedRedirect\": \"http://localhost:3000/service1\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/blog\",",
+            "\"expectedRedirect\": \"http://localhost:3000/\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/contact-us\",",
+            "\"expectedRedirect\": \"http://localhost:3000/contact\"",
+            "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/email-us\",",
+            "\"expectedRedirect\": \"http://localhost:3000/emmail\"",
+            "},",
+            "]",
+        };
+                
+        CreateFilet(_sampleJsonFile, jsonData);
+        CreateFilet(_sampleDomainJsonFile, jsonDomainData);
+
+
     }
 
     [ClassCleanup]
@@ -113,8 +179,15 @@ public class Tests
         if (File.Exists(_sampleCsvFile))
             File.Delete(_sampleCsvFile);
 
+        if (File.Exists(_sampleDomainCsvFile))
+            File.Delete(_sampleDomainCsvFile);
+
+
         if (File.Exists(_sampleJsonFile))
             File.Delete(_sampleJsonFile);
+
+        if (File.Exists(_sampleDomainJsonFile))
+            File.Delete(_sampleDomainJsonFile);
     }
 
     [TestMethod]
@@ -147,7 +220,7 @@ public class Tests
         output.AppendLine("");
         output.AppendLine("Options:");
         output.AppendLine("\t -f \t \t CSV or Json File Path that contains the url list to be tested.");
-        output.AppendLine("\t -d \t \t Hostname Domain eg. https://www.example.com");
+        output.AppendLine("\t -d \t \t Optional Hostname Domain eg. https://www.example.com - The host name can be included as a domain property in the source data");
         output.AppendLine("\t -o \t \t Optional output csv file eg. C:\\test\\output.csv");
         output.AppendLine("\t -t \t \t Runs test as a multithread operation.");
         output.AppendLine("\t -h Help \t Help Manual");
@@ -182,10 +255,9 @@ public class Tests
 
         CompareObjectProperties(parsedArgs, expectedArgs);
     }
-
-
+    
     [TestMethod]
-    public void Test_RedirectTest_LoadFile_FileNotExists()
+    public void Test_RedirectTest_LoadCSVFile_FileNotExists()
     {
         var args = new Arguments()
         {
@@ -205,9 +277,30 @@ public class Tests
 
 
     }
+    
+    [TestMethod]
+    public void Test_RedirectTest_LoadCSVDomainFile_FileNotExists()
+    {
+        var args = new Arguments()
+        {
+            FilePath = @"badTextFile",
+        };
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        Assert.AreEqual(loadedFile, false);
+
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+        {
+            Assert.AreEqual(messages[0], $"Specified file path, {args.FilePath}, does not exist.");
+        });
+
+
+    }
 
     [TestMethod]
-    public void Test_RedirectTest_LoadFile_UnsupportedFileExtension()
+    public void Test_RedirectTest_LoadCSVFile_UnsupportedFileExtension()
     {
         var args = new Arguments()
         {
@@ -241,6 +334,39 @@ public class Tests
     }
 
     [TestMethod]
+    public void Test_RedirectTest_LoadCSVDomainFile_UnsupportedFileExtension()
+    {
+        var args = new Arguments()
+        {
+            FilePath = @"D:\projects\URLTester\URLTester\301test.exe",
+        };
+
+        try
+        {
+            File.Create(args.FilePath).Dispose();
+
+            var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+            var loadedFile = testManager.LoadFile();
+
+            Assert.AreEqual(loadedFile, false);
+
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[0], "File Extension is not supported.");
+            });
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"Cannot create necessary test file: {ex.Message} ");
+        }
+        finally
+        {
+            if (File.Exists(args.FilePath))
+                File.Delete(args.FilePath);
+        }
+    }
+    
+    [TestMethod]
     public void Test_RedirectTest_LoadCSVFile_Success()
     {
         var args = new Arguments()
@@ -263,12 +389,55 @@ public class Tests
     }
 
     [TestMethod]
+    public void Test_RedirectTest_LoadCSVDomainFile_Success()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainCsvFile,
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        Assert.AreEqual(loadedFile, true);
+
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+        {
+            Assert.AreEqual(messages.Length, 0);
+        });
+
+    }
+    
+    [TestMethod]
     public void Test_RedirectTest_LoadJsonFile_Success()
     {
         var args = new Arguments()
         {
             Domain = _domain,
             FilePath = _sampleJsonFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        Assert.AreEqual(loadedFile, true);
+
+        testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+        {
+            Assert.AreEqual(messages.Length, 0);
+        });
+
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_LoadDomainJsonFile_Success()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainJsonFile,
             OutputText = _outputFile
         };
 
@@ -302,9 +471,32 @@ public class Tests
         if (loadedFile)
         {
             Assert.AreEqual(testManager.TestLinks(), false);
+            
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[0], "An error occurred with this url - /verify | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /help | The remote server returned an error: (404) Not Found.");
+            });
+        }
+    }
+    
+    [TestMethod]
+    public void Test_RedirectTest_TestDomainCSVLinks_Fail()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainCsvFile,
+            OutputText = _outputFile
+        };
 
 
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
 
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+            
             testManager.OutputErrorMessages((string[] messages, string outputPath) =>
             {
                 Assert.AreEqual(messages[0], "An error occurred with this url - /verify | The remote server returned an error: (404) Not Found.");
@@ -320,6 +512,36 @@ public class Tests
         {
             Domain = _domain,
             FilePath = _sampleCsvFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestDomainCSVLinks_All()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainCsvFile,
             OutputText = _outputFile
         };
 
@@ -371,12 +593,67 @@ public class Tests
     }
 
     [TestMethod]
+    public void Test_RedirectTest_TestDomainJsonLinks_Fail()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainJsonFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputErrorMessages((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[0], "An error occurred with this url - /verify | The remote server returned an error: (404) Not Found.");
+                Assert.AreEqual(messages[1], "An error occurred with this url - /help | The remote server returned an error: (404) Not Found.");
+            });
+        }
+    }
+
+    [TestMethod]
     public void Test_RedirectTest_TestJsonLinks_All()
     {
         var args = new Arguments()
         {
             Domain = _domain,
             FilePath = _sampleJsonFile,
+            OutputText = _outputFile
+        };
+
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
+
+    [TestMethod]
+    public void Test_RedirectTest_TestDomainJsonLinks_All()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainJsonFile,
             OutputText = _outputFile
         };
 
@@ -437,7 +714,40 @@ public class Tests
         }
     }
 
+    [TestMethod]
+    public void Test_RedirectTest_TestDomainJsonLinks_MultiThreaded()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainJsonFile,
+            OutputText = _outputFile,
+            Mutlithreaded = true
+        };
 
+        var testManager = new RedirectTestManager<UrlData>(
+                    args.Mutlithreaded ?
+                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText) :
+                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+
+
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            Assert.AreEqual(testManager.TestLinks(), false);
+
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
 
     [TestMethod]
     public void Test_RedirectTest_OutputResults()
@@ -471,6 +781,36 @@ public class Tests
     }
 
 
+    [TestMethod]
+    public void Test_RedirectTestDomains_OutputResults()
+    {
+        var args = new Arguments()
+        {
+            FilePath = _sampleDomainCsvFile,
+            OutputText = _outputFile
+        };
+
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var loadedFile = testManager.LoadFile();
+
+        if (loadedFile)
+        {
+            testManager.TestLinks();
+            testManager.OutputResults((string[] messages, string outputPath) =>
+            {
+                Assert.AreEqual(args.OutputText, outputPath);
+                Assert.AreEqual(messages[0], "0, Row Number, Test Result, Response Code, Response, url, expected url, actual url, error");
+                Assert.AreEqual(messages[1], "1, Failed, 0, 0, /verify, http://localhost:3000/test, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[2], "2, Failed, 0, 0, /help, http://localhost:3000/faq, , The remote server returned an error: (404) Not Found. -- ");
+                Assert.AreEqual(messages[3], "3, Failed, 200, OK, /, http://localhost:3000/test, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[4], "4, Failed, 200, OK, /service, http://localhost:3000/service1, http://localhost:3000/service, \"\"");
+                Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
+                Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
+                Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+            });
+        }
+    }
+
 
     /// <summary>
     /// Loops through all object properties to do a shallow compare
@@ -482,6 +822,28 @@ public class Tests
         foreach (var prop in obj1.GetType().GetProperties())
         {
             Assert.AreEqual(obj2.GetType().GetProperty(prop.Name).GetValue(obj2), prop.GetValue(obj1));
+        }
+    }
+
+    /// <summary>
+    /// Creates a file for testing purposes 
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <param name="data"></param>
+    private static void CreateFilet(string fileName, string[] data)
+    {
+        if (!File.Exists(fileName))
+        {
+            File.Create(fileName).Dispose();
+            using (StreamWriter sw = File.CreateText(fileName))
+            {
+                foreach (var item in data)
+                {
+                    sw.WriteLine(item);
+                }
+
+                sw.Close();
+            }
         }
     }
 
