@@ -20,17 +20,40 @@ URL,expectedRedirect
 /contact-us,/contact  
 ```
 
+### Sample Domain included Test File (csv) 
+```
+domain,URL,expectedRedirect  
+http://localhost:3000,/blog,/new  
+http://localhost:3000,/contact-us,/contact  
+```
+
 ### Sample Test File (Json) 
 ```
 [
-	{
+    {
       "URL": "/about",
       "expectedRedirect": "https://example.com/about-us"
     },
-	{
+    {
       "URL": "/links",
       "expectedRedirect": "https://example.com/sitemap.xml"
-	}
+    }
+]
+```
+
+### Sample Domain included Test File (Json) 
+```
+[
+    {
+      "domain": "http://localhost:3000",
+      "URL": "/about",
+      "expectedRedirect": "https://example.com/about-us"
+    },
+    {
+      "domain": "http://localhost:3000",	
+      "URL": "/links",
+      "expectedRedirect": "https://example.com/sitemap.xml"
+    }
 ]
 ```
 
@@ -38,13 +61,14 @@ URL,expectedRedirect
 
 ### Options:  
 *         -f              CSV or Json File Path that contains the url list to be tested.  
-*         -d              Hostname Domain eg. https://www.example.com  
+*         -d              Optional Hostname Domain eg. https://www.example.com - The host name can be included as a domain property in the source data  
 *         -o              Optional output text file eg. c:/output.csv  
 *         -t              Runs test as a mutlithread operation.
 *         -h Help         Help Manual
   
 Sample Arguements  
 *         -d https://www.example.com -f C:\301test.csv -o c:\output.csv  
+*         -f C:\301domainIncludedTest.csv -o c:\output.csv  
 
 * * *
 ### Unit Test
@@ -59,4 +83,6 @@ app.get('/contact', (req, res) => res.send('contact'));
 ```
 
 ### Version Changes
+**1.3.0** - Added the ability to have the domain as part of the source data. This allows testing of data from using different domains. eg. example.com and foo.example.com in the same test. The original -d parameter will still work too.
+
 **1.2.1** - Added a progress bar to the application.
