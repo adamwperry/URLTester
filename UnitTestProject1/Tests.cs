@@ -35,6 +35,7 @@ public class Tests
             "/blog,http://localhost:3000/",
             "/contact-us,http://localhost:3000/contact",
             "/email-us,http://localhost:3000/emmail",
+            "/contact-team,http://localhost:3000/email%20team",
         };
 
 
@@ -48,6 +49,7 @@ public class Tests
             _domain + ",/blog,http://localhost:3000/",
             _domain + ",/contact-us,http://localhost:3000/contact",
             _domain + ",/email-us,http://localhost:3000/emmail",
+            _domain + ",/contact-team,http://localhost:3000/email%20team",
         };
 
         //running into an issue on test during debugging the files still exist.
@@ -56,37 +58,8 @@ public class Tests
         if (!Directory.Exists(_testDirectory))
             Directory.CreateDirectory(_testDirectory);
 
-        //if (!File.Exists(_sampleCsvFile))
-        //{
-        //    File.Create(_sampleCsvFile).Dispose();
-        //    using (StreamWriter sw = File.CreateText(_sampleCsvFile))
-        //    {
-        //        foreach (var item in csvData)
-        //        {
-        //            sw.WriteLine(item);
-        //        }
-
-        //        sw.Close();
-        //    }
-        //}
-
-        //if (!File.Exists(_sampleDomainCsvFile))
-        //{
-        //    File.Create(_sampleDomainCsvFile).Dispose();
-        //    using (StreamWriter sw = File.CreateText(_sampleDomainCsvFile))
-        //    {
-        //        foreach (var item in csvDataDomain)
-        //        {
-        //            sw.WriteLine(item);
-        //        }
-
-        //        sw.Close();
-        //    }
-        //}
-
         CreateFilet(_sampleCsvFile, csvData);
         CreateFilet(_sampleDomainCsvFile, csvDataDomain);
-
 
         _sampleJsonFile = $@"{_testDirectory}\sample.json";
         _sampleDomainJsonFile = $@"{_testDirectory}\sampleDomain.json";
@@ -121,6 +94,10 @@ public class Tests
             "{",
             "\"URL\": \"/email-us\",",
             "\"expectedRedirect\": \"http://localhost:3000/emmail\"",
+            "},",
+            "{",
+            "\"URL\": \"/contact-team\",",
+            "\"expectedRedirect\": \"http://localhost:3000/email%20team\"",
             "},",
             "]",
         };
@@ -164,13 +141,16 @@ public class Tests
             "\"URL\": \"/email-us\",",
             "\"expectedRedirect\": \"http://localhost:3000/emmail\"",
             "},",
+            "{",
+            "\"domain\": \"http://localhost:3000\",",
+            "\"URL\": \"/contact-team\",",
+            "\"expectedRedirect\": \"http://localhost:3000/email%20team\"",
+            "},",
             "]",
         };
                 
         CreateFilet(_sampleJsonFile, jsonData);
         CreateFilet(_sampleDomainJsonFile, jsonDomainData);
-
-
     }
 
     [ClassCleanup]
@@ -532,6 +512,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");                  
             });
         }
     }
@@ -562,6 +543,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -644,6 +626,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -674,6 +657,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -710,6 +694,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -745,6 +730,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -776,6 +762,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
@@ -807,6 +794,7 @@ public class Tests
                 Assert.AreEqual(messages[5], "5, Passed, 200, OK, /blog, http://localhost:3000/, http://localhost:3000/, \"\"");
                 Assert.AreEqual(messages[6], "6, Passed, 200, OK, /contact-us, http://localhost:3000/contact, http://localhost:3000/contact, \"\"");
                 Assert.AreEqual(messages[7], "7, Failed, 200, OK, /email-us, http://localhost:3000/emmail, http://localhost:3000/email, \"\"");
+                Assert.AreEqual(messages[8], "8, Passed, 200, OK, /contact-team, http://localhost:3000/email%20team, http://localhost:3000/email team, \"\"");
             });
         }
     }
