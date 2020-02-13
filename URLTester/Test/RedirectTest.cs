@@ -121,8 +121,9 @@ namespace UrlTester.Test
                     item.HeaderResponseCode = response.StatusCode;
                     item.ActualRedirect = response.ResponseUri;
                 }
-
-                if (item.ExpectedRedirect != item.ActualRedirect.ToString())
+                
+                //issue #17 
+                if (WebUtility.UrlDecode(item.ExpectedRedirect).Trim() != WebUtility.UrlDecode(item.ActualRedirect.ToString()).Trim())
                 {
                     item.Testfail = true;
                 }
@@ -156,7 +157,7 @@ namespace UrlTester.Test
 
             return true;
         }
-        
+
         /// <summary>
         /// Build an output message for the user
         /// right now this is being used for both the csv output and the screen output.
