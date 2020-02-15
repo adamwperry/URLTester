@@ -1,5 +1,5 @@
 # URLTester
-A simple C# console 301 redirects tester. This application uses a list of urls from an input (csv or json) file.  The application iterates the provided list of URLs and compiles a list of request responses while testing the returned responses match the expected url from the file. Last the test results are dislayed to the user and saved to a csv file.
+A simple C# console client that test url redirections. Http status codes 301, 302, ect. This application uses a list of URLs from an input (csv or json) file.  The application iterates the provided list of URLs and compiles a list of request responses while testing the returned responses match the expected URL from the file. Last the test results are dislayed to the user and/or saved to a csv file.
 
 **e.g.** (csv test output file)
 
