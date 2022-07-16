@@ -1,6 +1,7 @@
 ﻿using UrlTester.Objects;
 using Core.Objects;
 using Parsers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -14,6 +15,7 @@ namespace UrlTester.Test
     {
         protected IEnumerable<IUrlData> UrlList;
         protected List<ErrorMessage> ErrorMessages;
+        protected readonly IProgressBar ProgressBar;
         protected readonly string BaseUrl;
         protected readonly string FilePath;
         protected readonly string OutputFilePath;
@@ -30,6 +32,14 @@ namespace UrlTester.Test
             BaseUrl = baseUrl;
             FilePath = filePath;
             OutputFilePath = outputFilePath;
+        }
+
+        public RedirectTest(string baseUrl, string filePath, string outputFilePath, IProgressBar progressBar)
+        {
+            BaseUrl = baseUrl;
+            FilePath = filePath;
+            OutputFilePath = outputFilePath;
+            ProgressBar = new UnitTestProgressBar();
         }
 
         /// <summary>
@@ -88,7 +98,10 @@ namespace UrlTester.Test
 
             var i = 1;
 
-            using (var progress = new ConsoleProgressBar(UrlList.Count()))
+            
+            //if object is initialized with a progress bar then use it.
+            var progress = ProgressBar is UnitTestProgressBar ? ProgressBar : new ConsoleProgressBar(UrlList.Count());
+            using (progress)
             {
                 foreach (var item in UrlList)
                 {

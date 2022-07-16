@@ -19,13 +19,19 @@ namespace UrlTester.Test
         {
         }
 
+        public ParallelRedirectTest(string baseUrl, string filePath, string outputFilePath, IProgressBar progressBar) : base(baseUrl, filePath, outputFilePath, progressBar)
+        {
+        }
+
         public override bool TestLinks()
         {
             ErrorMessages = new List<ErrorMessage>();
             var returnValue = true;
 
             var i = 1;
-            using (var progress = new ConsoleProgressBar(UrlList.Count()))
+            //if object is initialized with a progress bar then use it.
+            var progress = ProgressBar is UnitTestProgressBar ? ProgressBar : new ConsoleProgressBar(UrlList.Count());
+            using (progress)
             {
                 Parallel.ForEach(UrlList, (item) =>
                 {
