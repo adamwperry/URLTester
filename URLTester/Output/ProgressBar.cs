@@ -28,7 +28,7 @@ namespace _URLTester.Output
         public int ProgressBarBlockSize { get { return progressBarBlockSize ?? 30; } set { progressBarBlockSize = value; } }
     }
 
-    public class ConsoleProgressBar : IDisposable
+    public class ConsoleProgressBar : IProgressBar
     {
         private readonly int TotalBlocksWidth, BlockIncrement, TotalCount;
 

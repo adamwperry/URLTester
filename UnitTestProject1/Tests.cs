@@ -5,6 +5,7 @@ using UrlTester.Objects;
 using UrlTester.Test;
 using System.IO;
 using System.Text;
+using _URLTester.Output;
 
 [TestClass]
 public class Tests
@@ -445,7 +446,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -470,7 +471,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -496,7 +497,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -527,7 +528,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -559,7 +560,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -584,7 +585,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -610,7 +611,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -641,7 +642,7 @@ public class Tests
         };
 
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -675,8 +676,8 @@ public class Tests
 
         var testManager = new RedirectTestManager<UrlData>(
                     args.Mutlithreaded ?
-                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText) :
-                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()) :
+                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
 
 
         var loadedFile = testManager.LoadFile();
@@ -711,8 +712,8 @@ public class Tests
 
         var testManager = new RedirectTestManager<UrlData>(
                     args.Mutlithreaded ?
-                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText) :
-                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+                        new ParallelRedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()) :
+                        new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
 
 
         var loadedFile = testManager.LoadFile();
@@ -745,7 +746,7 @@ public class Tests
             OutputText = _outputFile
         };
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)
@@ -777,7 +778,7 @@ public class Tests
             OutputText = _outputFile
         };
 
-        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText));
+        var testManager = new RedirectTestManager<UrlData>(new RedirectTest<UrlData>(args.Domain, args.FilePath, args.OutputText, new UnitTestProgressBar()));
         var loadedFile = testManager.LoadFile();
 
         if (loadedFile)

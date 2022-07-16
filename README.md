@@ -83,6 +83,8 @@ app.get('/contact', (req, res) => res.send('contact'));
 ```
 
 ### Version Changes
+**1.4.0** - Updated the .Net version to 4.8, and updated the Newtonsoft.Json to version 13.0.1. Created a new progress bar type for test to run with out console progress bar.
+
 **1.3.1** - Changed the way the expected and the actual url string comparison is done. Added WebUtility.UrlDecode to handle %20 and other encoded characters.
 
 **1.3.0** - Added the ability to have the domain as part of the source data. This allows testing of data from using different domains. eg. example.com and foo.example.com in the same test. The original -d parameter will still work too.
